@@ -301,7 +301,7 @@ local function teleportKillAndFlick(prefix)
   
 startSpin(100000)
 
-           task.wait(2)
+           task.wait(0.1)
             
                 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0))  
 
