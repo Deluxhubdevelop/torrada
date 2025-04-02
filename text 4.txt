@@ -297,7 +297,7 @@ local function teleportKillAndFlick(prefix)
                     wait(0.03)  -- Reduzindo o tempo para aumentar a força    
                 end    
 
-                task.wait(2)
+                task.wait(0.1)
   
 startSpin(100000)
                 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0))  
