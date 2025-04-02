@@ -300,6 +300,9 @@ local function teleportKillAndFlick(prefix)
                 task.wait(0.1)
   
 startSpin(100000)
+
+           task.wait(2)
+            
                 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0))  
 
                 print("Fling aplicado com sucesso!")    
