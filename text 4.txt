@@ -299,7 +299,7 @@ local function teleportKillAndFlick(prefix)
 
                 task.wait(0.1)
   
-startSpin(100000)
+startSpin(1000000000000)
 
            task.wait(0.1)
             
