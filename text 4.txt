@@ -82,7 +82,7 @@ local function createGUI()
 
     teleportButton.Font = Enum.Font.SourceSans
 
-    teleportButton.Text = "jail player"
+    teleportButton.Text = "fling player"
 
     local teleportToPositionButton = Instance.new("TextButton")
 
@@ -128,9 +128,9 @@ local function createGUI()
 
             Spin.Name = "Spinning"
 
-            Spin.MaxTorque = Vector3.new(math.huge, 0, 0)
+            Spin.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
 
-            Spin.AngularVelocity = Vector3.new(spinSpeed, 0, 0)
+            Spin.AngularVelocity = Vector3.new(spinSpeed, spinSpeed, spinSpeed)
 
             Spin.Parent = root
 
