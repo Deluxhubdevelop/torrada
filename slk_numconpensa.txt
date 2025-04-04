@@ -264,14 +264,14 @@ local function teleportKillAndFlick(prefix)
 
                 -- Teleporte ao redor do alvo em 8 direções mais próximas (1.5 studs)    
                 local directions = {    
-                    Vector3.new(1.5, 0, 0),   -- Frente    
-                    Vector3.new(-1.5, 0, 0),  -- Trás    
-                    Vector3.new(0, 0, 1.5),   -- Direita    
-                    Vector3.new(0, 0, -1.5),  -- Esquerda    
-                    Vector3.new(1.5, 0, 1.5), -- Frente Direita    
-                    Vector3.new(-1.5, 0, 1.5),-- Trás Direita    
-                    Vector3.new(1.5, 0, -1.5),-- Frente Esquerda    
-                    Vector3.new(-1.5, 0, -1.5)-- Trás Esquerda    
+                    Vector3.new(0.5, 0, 0),   -- Frente    
+                    Vector3.new(-0.5, 0, 0),  -- Trás    
+                    Vector3.new(0, 0, 0.5),   -- Direita    
+                    Vector3.new(0, 0, -0.5),  -- Esquerda    
+                    Vector3.new(0.5, 0, 0.5), -- Frente Direita    
+                    Vector3.new(-0.5, 0, 0.5),-- Trás Direita    
+                    Vector3.new(0.5, 0, -0.5),-- Frente Esquerda    
+                    Vector3.new(-0.5, 0, -0.5)-- Trás Esquerda    
                 }    
 
                 for _, direction in pairs(directions) do    
