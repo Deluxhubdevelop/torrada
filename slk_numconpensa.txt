@@ -351,6 +351,8 @@ end)
                 break    
             end    
 
+     stopSpin()
+
             -- Tempo máximo de flick, caso o player não sente no sofá    
             if tick() - startTime > 7 then    
                 print("Tempo expirado. Retornando à posição original.")    
