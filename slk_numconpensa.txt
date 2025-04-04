@@ -284,9 +284,7 @@ local function teleportKillAndFlick(prefix)
             -- Se o alvo sentar no sofá, inicia o fling    
             if isPlayerSitting(targetPlayer) then    
      
-    -- SUPER ANTI-VOID & ANTI-FLING (exclusivo para Kill Player)
-
-local Players = game:GetService("Players")
+    local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
@@ -294,40 +292,63 @@ local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local hrp = char:WaitForChild("HumanoidRootPart")
 
--- Criar uma base invisível só para o player
-local base = Instance.new("Part")
-base.Anchored = true
-base.Size = Vector3.new(50, 1, 50) -- Tamanho menor, só protege você
-base.Position = Vector3.new(hrp.Position.X, -450, hrp.Position.Z)
-base.Transparency = 0.3
-base.CanCollide = true
-base.Name = "AntiVoidKillPlayer"
-base.Parent = Workspace
+local base -- base reutilizável
+
+-- Função para criar a base
+local function createBase()
+    if base and base.Parent then return end -- já existe
+
+    base = Instance.new("Part")
+    base.Anchored = true
+    base.Size = Vector3.new(50, 1, 50)
+    base.Position = Vector3.new(hrp.Position.X, -450, hrp.Position.Z)
+    base.Transparency = 0.3
+    base.CanCollide = true
+    base.Name = "AntiVoidKillPlayer"
+    base.Parent = Workspace
+    base.Touched:Connect(function() end)
+end
 
 -- Proteção ativa
 RunService.Heartbeat:Connect(function()
     if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-
     hrp = player.Character.HumanoidRootPart
 
-    -- Base invisível segue o player no eixo X/Z
+    -- Recriar base se necessário
+    createBase()
+
+    -- Base segue o player
     base.Position = Vector3.new(hrp.Position.X, -445, hrp.Position.Z)
 
-    -- Bloqueio de void (impede a morte ao cair)
+    -- Anti-Void
     if hrp.Position.Y <= -445 then
         hrp.Velocity = Vector3.zero
         hrp.CFrame = CFrame.new(hrp.Position.X, -450.5, hrp.Position.Z)
     end
 
-    -- Anti-Fling (reseta velocidades absurdas)
+    -- Anti-Fling
     if hrp.Velocity.Magnitude > 150 or hrp.RotVelocity.Magnitude > 50 then
         hrp.Velocity = Vector3.zero
         hrp.RotVelocity = Vector3.zero
     end
+
+    -- Deleta a base se o player sair dela
+    local touchingParts = base:GetTouchingParts()
+    local isTouching = false
+    for _, part in ipairs(touchingParts) do
+        if part:IsDescendantOf(char) then
+            isTouching = true
+            break
+        end
+    end
+
+    if not isTouching then
+        base:Destroy()
+    end
 end)
 
     task.wait(0.1)
-           game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -440, 0))  
+           game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))  
 
                 print("Fling aplicado com sucesso!")    
 
