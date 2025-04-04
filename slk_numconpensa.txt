@@ -1,0 +1,484 @@
+local player = game.Players.LocalPlayer
+
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Função para criar a GUI
+
+local function createGUI()
+
+    local ScreenGui = Instance.new("ScreenGui")
+
+    ScreenGui.Parent = playerGui
+
+    ScreenGui.Name = "SpinControlGUI"
+
+    local Frame = Instance.new("Frame")
+
+    Frame.Parent = ScreenGui
+
+    Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+    Frame.Position = UDim2.new(0.5, -100, 0.5, -120)  -- Moveu a GUI para cima
+
+    Frame.Size = UDim2.new(0, 200, 0, 240)  -- Aumenta o tamanho da GUI
+
+    Frame.Visible = false
+
+    local speedTextBox = Instance.new("TextBox")
+
+    speedTextBox.Parent = Frame
+
+    speedTextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+
+    speedTextBox.Position = UDim2.new(0.5, -40, 0, 10)  -- Moveu o TextBox para cima de todos os botões
+
+    speedTextBox.Size = UDim2.new(0, 80, 0, 30)
+
+    speedTextBox.Font = Enum.Font.SourceSans
+
+    speedTextBox.PlaceholderText = "Inicial"
+
+    speedTextBox.Text = ""
+
+    speedTextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+
+    local spinButton = Instance.new("TextButton")
+
+    spinButton.Parent = Frame
+
+    spinButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+
+    spinButton.Position = UDim2.new(0.5, -40, 0, 50)
+
+    spinButton.Size = UDim2.new(0, 80, 0, 30)
+
+    spinButton.Font = Enum.Font.SourceSans
+
+    spinButton.Text = "Spin"
+
+    local espButton = Instance.new("TextButton")
+
+    espButton.Parent = Frame
+
+    espButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+
+    espButton.Position = UDim2.new(0.5, -40, 0, 90)
+
+    espButton.Size = UDim2.new(0, 80, 0, 30)
+
+    espButton.Font = Enum.Font.SourceSans
+
+    espButton.Text = "ESP"
+
+    local teleportButton = Instance.new("TextButton")
+
+    teleportButton.Parent = Frame
+
+    teleportButton.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+
+    teleportButton.Position = UDim2.new(0.5, -40, 0, 130)
+
+    teleportButton.Size = UDim2.new(0, 80, 0, 30)
+
+    teleportButton.Font = Enum.Font.SourceSans
+
+    teleportButton.Text = "jail player"
+
+    local teleportToPositionButton = Instance.new("TextButton")
+
+    teleportToPositionButton.Parent = Frame
+
+    teleportToPositionButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+
+    teleportToPositionButton.Position = UDim2.new(0.5, -40, 0, 170)
+
+    teleportToPositionButton.Size = UDim2.new(0, 80, 0, 30)
+
+    teleportToPositionButton.Font = Enum.Font.SourceSans
+
+    teleportToPositionButton.Text = "Bring Couch"
+
+    -- Variáveis de controle
+
+    local spinning = false
+
+    local espEnabled = false
+
+    local currentSpinSpeed = 40
+
+    -- Função para o Spin
+
+    local function startSpin(speed)
+
+        local spinSpeed = tonumber(speed) or 30
+
+        local root = player.Character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+
+            local spinBody = root:FindFirstChild("Spinning")
+
+            if spinBody then
+
+                spinBody:Destroy()
+
+            end
+
+            local Spin = Instance.new("BodyAngularVelocity")
+
+            Spin.Name = "Spinning"
+
+            Spin.MaxTorque = Vector3.new(math.huge, 0, 0)
+
+            Spin.AngularVelocity = Vector3.new(spinSpeed, 0, 0)
+
+            Spin.Parent = root
+
+        end
+
+    end
+
+    -- Função para parar o Spin
+
+    local function stopSpin()
+
+        local root = player.Character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+
+            local spinBody = root:FindFirstChild("Spinning")
+
+            if spinBody then
+
+                spinBody:Destroy()
+
+            end
+
+        end
+
+    end
+
+    local function toggleESP() espEnabled = not espEnabled
+
+for _, v in pairs(game.Players:GetPlayers()) do
+    if v ~= player then
+        if espEnabled then
+            local isSeated = v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.SeatPart ~= nil
+            local status = isSeated and "Sentado" or "Em pé"
+            
+            local esp = Instance.new("BillboardGui")
+            esp.Parent = v.Character:WaitForChild("Head")
+            esp.Adornee = v.Character:WaitForChild("Head")
+            esp.Size = UDim2.new(0, 250, 0, 250)
+            esp.AlwaysOnTop = true
+
+            local label = Instance.new("TextLabel")
+            label.Parent = esp
+            label.Text = v.Name .. " - " .. status
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.TextColor3 = Color3.fromRGB(255, 255, 50)
+            label.BackgroundTransparency = 1
+            
+            spawn(function()
+                while esp.Parent do
+                    wait(0.1)
+                    isSeated = v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.SeatPart ~= nil
+                    status = isSeated and "Sentado" or "Em pé"
+                    label.Text = v.Name .. " - " .. status
+                end
+            end)
+            
+            -- Criar contorno vermelho no corpo inteiro
+            for _, part in pairs(v.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Parent = part
+                    highlight.FillTransparency = 1
+                    highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+                end
+            end
+        else
+            for _, esp in pairs(v.Character:WaitForChild("Head"):GetChildren()) do
+                if esp:IsA("BillboardGui") then
+                    esp:Destroy()
+                end
+            end
+            
+            for _, part in pairs(v.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    local highlight = part:FindFirstChildOfClass("Highlight")
+                    if highlight then
+                        highlight:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end
+
+end
+
+    local function isPlayerSitting(player)
+    local character = player.Character
+    if character then
+        local humanoid = character:FindFirstChild("Humanoid")
+        if humanoid and humanoid.SeatPart then
+            return true
+        end
+    end
+    return false
+end
+
+local function teleportKillAndFlick(prefix)
+    local targetPlayer = nil
+    local originalPosition = nil
+
+    -- Busca pelo jogador com o prefixo    
+    for _, v in pairs(game.Players:GetPlayers()) do    
+        if v.Name:sub(1, #prefix):lower() == prefix:lower() then    
+            targetPlayer = v    
+            break    
+        end    
+    end    
+
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then    
+        local targetHRP = targetPlayer.Character.HumanoidRootPart    
+        local playerHRP = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")    
+
+        if not playerHRP then    
+            print("Seu personagem não carregou totalmente.")    
+            return    
+        end    
+
+        -- Armazena a posição original do jogador    
+        originalPosition = playerHRP.Position    
+
+        -- Ativa o spin antes do TP    
+        startSpin(currentSpinSpeed)    
+
+        local startTime = tick()    
+
+        while true do    
+            if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then    
+                local targetHRP = targetPlayer.Character.HumanoidRootPart    
+
+                -- Teleporte ao redor do alvo em 8 direções mais próximas (1.5 studs)    
+                local directions = {    
+                    Vector3.new(1.5, 0, 0),   -- Frente    
+                    Vector3.new(-1.5, 0, 0),  -- Trás    
+                    Vector3.new(0, 0, 1.5),   -- Direita    
+                    Vector3.new(0, 0, -1.5),  -- Esquerda    
+                    Vector3.new(1.5, 0, 1.5), -- Frente Direita    
+                    Vector3.new(-1.5, 0, 1.5),-- Trás Direita    
+                    Vector3.new(1.5, 0, -1.5),-- Frente Esquerda    
+                    Vector3.new(-1.5, 0, -1.5)-- Trás Esquerda    
+                }    
+
+                for _, direction in pairs(directions) do    
+                    local newPos = targetHRP.Position + direction    
+                    playerHRP.CFrame = CFrame.new(newPos.X, targetHRP.Position.Y, newPos.Z) * CFrame.Angles(0, math.rad(math.random(0, 360)), 0)    
+                    wait(0.03)  -- Reduzindo o tempo de espera para aumentar a intensidade    
+                end    
+            end    
+
+            -- Se o alvo sentar no sofá, inicia o fling    
+            if isPlayerSitting(targetPlayer) then    
+     
+    -- SUPER ANTI-VOID & ANTI-FLING (exclusivo para Kill Player)
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+
+-- Criar uma base invisível só para o player
+local base = Instance.new("Part")
+base.Anchored = true
+base.Size = Vector3.new(50, 1, 50) -- Tamanho menor, só protege você
+base.Position = Vector3.new(hrp.Position.X, -450, hrp.Position.Z)
+base.Transparency = 1
+base.CanCollide = true
+base.Name = "AntiVoidKillPlayer"
+base.Parent = Workspace
+
+-- Proteção ativa
+RunService.Heartbeat:Connect(function()
+    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+
+    hrp = player.Character.HumanoidRootPart
+
+    -- Base invisível segue o player no eixo X/Z
+    base.Position = Vector3.new(hrp.Position.X, -450, hrp.Position.Z)
+
+    -- Bloqueio de void (impede a morte ao cair)
+    if hrp.Position.Y <= -445 then
+        hrp.Velocity = Vector3.zero
+        hrp.CFrame = CFrame.new(hrp.Position.X, -448.5, hrp.Position.Z)
+    end
+
+    -- Anti-Fling (reseta velocidades absurdas)
+    if hrp.Velocity.Magnitude > 150 or hrp.RotVelocity.Magnitude > 50 then
+        hrp.Velocity = Vector3.zero
+        hrp.RotVelocity = Vector3.zero
+    end
+end)
+
+    task.wait(0.1)
+           game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -448, 0))  
+
+                print("Fling aplicado com sucesso!")    
+
+                -- Aguarda o jogador sair do sofá para restaurá-lo    
+                while isPlayerSitting(targetPlayer) do    
+                    wait(0.1)    
+                end    
+
+                print("Jogador saiu do sofá. Retornando à posição original.")    
+
+                -- Retorna o jogador à posição original e restaura os controles    
+                playerHRP.CFrame = CFrame.new(originalPosition)    
+                local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")    
+
+                if humanoid then    
+                    humanoid.PlatformStand = false    
+                    humanoid.WalkSpeed = 16    
+                    humanoid.JumpHeight = 7.2    
+                end    
+
+                break    
+            end    
+
+            -- Tempo máximo de flick, caso o player não sente no sofá    
+            if tick() - startTime > 7 then    
+                print("Tempo expirado. Retornando à posição original.")    
+                stopSpin()    
+
+                playerHRP.CFrame = CFrame.new(originalPosition)    
+                local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")    
+
+                if humanoid then    
+                    humanoid.PlatformStand = false    
+                    humanoid.WalkSpeed = 16    
+                    humanoid.JumpHeight = 7.2    
+                end    
+
+                break    
+            end    
+
+            wait(0.03) -- Redução do tempo para um efeito mais intenso    
+        end    
+    else    
+        print("Nenhum jogador encontrado com o prefixo: " .. prefix)    
+    end
+end
+
+    -- Função para teleportar para uma posição específica
+
+    local function teleportToSpecificPosition()
+
+        local targetPosition = Vector3.new(-82.60, 18.73, -129.92)  -- Ajusta a posição para -1 no Y
+
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+
+    end
+
+    -- Eventos para os botões
+
+    spinButton.MouseButton1Click:Connect(function()
+
+        currentSpinSpeed = tonumber(speedTextBox.Text) or 70
+
+        if spinning then
+
+            stopSpin()
+
+            spinning = false
+
+            spinButton.Text = "Spin"
+
+        else
+
+            startSpin(currentSpinSpeed)
+
+            spinning = true
+
+            spinButton.Text = "Stop"
+
+        end
+
+    end)
+
+    espButton.MouseButton1Click:Connect(function()
+
+        toggleESP()
+
+    end)
+
+    teleportButton.MouseButton1Click:Connect(function()
+
+        local prefix = speedTextBox.Text
+
+        teleportKillAndFlick(prefix)
+
+    end)
+
+    teleportToPositionButton.MouseButton1Click:Connect(function()
+
+        teleportToSpecificPosition()
+
+    end)
+
+    local floatButton = Instance.new("TextButton")
+
+    floatButton.Parent = ScreenGui
+
+    floatButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+
+    floatButton.Position = UDim2.new(0, 10, 0.5, -25)
+
+    floatButton.Size = UDim2.new(0, 50, 0, 50)
+
+    floatButton.Font = Enum.Font.SourceSans
+
+    floatButton.Text = "GUI OFF" -- Inicialmente indica que a GUI está fechada
+
+    floatButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    floatButton.MouseButton1Click:Connect(function()
+
+        if Frame.Visible then
+
+            Frame.Visible = false
+
+            floatButton.Text = "GUI OFF" -- Indica que está fechada
+
+        else
+
+            Frame.Visible = true
+
+            floatButton.Text = "GUI ON" -- Indica que está aberta
+
+        end
+
+    end)
+
+end
+
+-- Criar a GUI ao iniciar o jogo
+
+createGUI()
+
+-- Garantir que a GUI não desapareça ao morrer
+
+player.CharacterAdded:Connect(function()
+
+    if not playerGui:FindFirstChild("SpinControlGUI") then
+
+        createGUI()
+
+    end
+
+end)
