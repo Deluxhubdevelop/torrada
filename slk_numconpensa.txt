@@ -311,7 +311,7 @@ RunService.Heartbeat:Connect(function()
     hrp = player.Character.HumanoidRootPart
 
     -- Base invisível segue o player no eixo X/Z
-    base.Position = Vector3.new(hrp.Position.X, -448, hrp.Position.Z)
+    base.Position = Vector3.new(hrp.Position.X, -445, hrp.Position.Z)
 
     -- Bloqueio de void (impede a morte ao cair)
     if hrp.Position.Y <= -445 then
@@ -327,7 +327,7 @@ RunService.Heartbeat:Connect(function()
 end)
 
     task.wait(0.1)
-           game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -445, 0))  
+           game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -440, 0))  
 
                 print("Fling aplicado com sucesso!")    
 
