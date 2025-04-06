@@ -357,9 +357,9 @@ end)
     task.wait(0.1)
            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))
 
-local VirtualInputManager = game:GetService("VirtualInputManager")
-
 task.wait(0.5)
+
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 -- Pressiona a tecla "1"
 VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
