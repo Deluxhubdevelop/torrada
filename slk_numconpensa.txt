@@ -1,4 +1,4 @@
-local player = game.Players.LocalPlayer
+Oilocal player = game.Players.LocalPlayer
 
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -358,6 +358,8 @@ end)
            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))
 
 local VirtualInputManager = game:GetService("VirtualInputManager")
+
+task.wait(0.5)
 
 -- Pressiona a tecla "1"
 VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
