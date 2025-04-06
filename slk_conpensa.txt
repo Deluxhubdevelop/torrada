@@ -1,0 +1,678 @@
+local player = game.Players.LocalPlayer
+
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Função para criar a GUI
+
+local function createGUI()
+
+    local ScreenGui = Instance.new("ScreenGui")
+
+    ScreenGui.Parent = playerGui
+
+    ScreenGui.Name = "SpinControlGUI"
+
+    local Frame = Instance.new("Frame")
+
+    Frame.Parent = ScreenGui
+
+    Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+    Frame.Position = UDim2.new(0.5, -100, 0.5, -120)  -- Moveu a GUI para cima
+
+    Frame.Size = UDim2.new(0, 200, 0, 240)  -- Aumenta o tamanho da GUI
+
+    Frame.Visible = false
+
+    local speedTextBox = Instance.new("TextBox")
+
+    speedTextBox.Parent = Frame
+
+    speedTextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+
+    speedTextBox.Position = UDim2.new(0.5, -40, 0, 10)  -- Moveu o TextBox para cima de todos os botões
+
+    speedTextBox.Size = UDim2.new(0, 80, 0, 30)
+
+    speedTextBox.Font = Enum.Font.SourceSans
+
+    speedTextBox.PlaceholderText = "Inicial"
+
+    speedTextBox.Text = ""
+
+    speedTextBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+
+    local spinButton = Instance.new("TextButton")
+
+    spinButton.Parent = Frame
+
+    spinButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+
+    spinButton.Position = UDim2.new(0.5, -40, 0, 50)
+
+    spinButton.Size = UDim2.new(0, 80, 0, 30)
+
+    spinButton.Font = Enum.Font.SourceSans
+
+    spinButton.Text = "Spin"
+
+    local espButton = Instance.new("TextButton")
+
+    espButton.Parent = Frame
+
+    espButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+
+    espButton.Position = UDim2.new(0.5, -40, 0, 90)
+
+    espButton.Size = UDim2.new(0, 80, 0, 30)
+
+    espButton.Font = Enum.Font.SourceSans
+
+    espButton.Text = "ESP"
+
+    local teleportButton = Instance.new("TextButton")
+
+    teleportButton.Parent = Frame
+
+    teleportButton.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+
+    teleportButton.Position = UDim2.new(0.5, -40, 0, 130)
+
+    teleportButton.Size = UDim2.new(0, 80, 0, 30)
+
+    teleportButton.Font = Enum.Font.SourceSans
+
+    teleportButton.Text = "jail player"
+
+    local teleportToPositionButton = Instance.new("TextButton")
+
+    teleportToPositionButton.Parent = Frame
+
+    teleportToPositionButton.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+
+    teleportToPositionButton.Position = UDim2.new(0.5, -40, 0, 170)
+
+    teleportToPositionButton.Size = UDim2.new(0, 80, 0, 30)
+
+    teleportToPositionButton.Font = Enum.Font.SourceSans
+
+    teleportToPositionButton.Text = "fe fling door"
+
+    -- Variáveis de controle
+
+    local spinning = false
+
+    local espEnabled = false
+
+    local currentSpinSpeed = 40
+
+    -- Função para o Spin
+
+    local function startSpin(speed)
+
+        local spinSpeed = tonumber(speed) or 30
+
+        local root = player.Character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+
+            local spinBody = root:FindFirstChild("Spinning")
+
+            if spinBody then
+
+                spinBody:Destroy()
+
+            end
+
+            local Spin = Instance.new("BodyAngularVelocity")
+
+            Spin.Name = "Spinning"
+
+            Spin.MaxTorque = Vector3.new(math.huge, 0, 0)
+
+            Spin.AngularVelocity = Vector3.new(spinSpeed, 0, 0)
+
+            Spin.Parent = root
+
+        end
+
+    end
+
+    -- Função para parar o Spin
+
+    local function stopSpin()
+
+        local root = player.Character:FindFirstChild("HumanoidRootPart")
+
+        if root then
+
+            local spinBody = root:FindFirstChild("Spinning")
+
+            if spinBody then
+
+                spinBody:Destroy()
+
+            end
+
+        end
+
+    end
+
+    local function toggleESP() espEnabled = not espEnabled
+
+for _, v in pairs(game.Players:GetPlayers()) do
+    if v ~= player then
+        if espEnabled then
+            local isSeated = v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.SeatPart ~= nil
+            local status = isSeated and "Sentado" or "Em pé"
+            
+            local esp = Instance.new("BillboardGui")
+            esp.Parent = v.Character:WaitForChild("Head")
+            esp.Adornee = v.Character:WaitForChild("Head")
+            esp.Size = UDim2.new(0, 250, 0, 250)
+            esp.AlwaysOnTop = true
+
+            local label = Instance.new("TextLabel")
+            label.Parent = esp
+            label.Text = v.Name .. " - " .. status
+            label.Size = UDim2.new(1, 0, 1, 0)
+            label.TextColor3 = Color3.fromRGB(255, 255, 50)
+            label.BackgroundTransparency = 1
+            
+            spawn(function()
+                while esp.Parent do
+                    wait(0.1)
+                    isSeated = v.Character and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.SeatPart ~= nil
+                    status = isSeated and "Sentado" or "Em pé"
+                    label.Text = v.Name .. " - " .. status
+                end
+            end)
+            
+            -- Criar contorno vermelho no corpo inteiro
+            for _, part in pairs(v.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Parent = part
+                    highlight.FillTransparency = 1
+                    highlight.OutlineColor = Color3.fromRGB(255, 0, 0)
+                end
+            end
+        else
+            for _, esp in pairs(v.Character:WaitForChild("Head"):GetChildren()) do
+                if esp:IsA("BillboardGui") then
+                    esp:Destroy()
+                end
+            end
+            
+            for _, part in pairs(v.Character:GetChildren()) do
+                if part:IsA("BasePart") then
+                    local highlight = part:FindFirstChildOfClass("Highlight")
+                    if highlight then
+                        highlight:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end
+
+end
+
+    local function isPlayerSitting(player)
+
+    -- Verifica se o jogador está sentado no sofá
+
+    local character = player.Character
+
+    if character then
+
+        local humanoid = character:FindFirstChild("Humanoid")
+
+        if humanoid and humanoid.SeatPart then
+
+            return true  -- O jogador está sentado
+
+        end
+
+    end
+
+    return false  -- O jogador não está sentado
+
+end
+
+local function teleportKillAndFlick(prefix)
+
+    local targetPlayer = nil
+
+    local originalPosition = nil  -- Variável para armazenar a posição original
+
+    -- Busca pelo jogador com o prefixo
+
+    for _, v in pairs(game.Players:GetPlayers()) do
+
+        if v.Name:sub(1, #prefix):lower() == prefix:lower() then
+
+            targetPlayer = v
+
+            break
+
+        end
+
+    end
+
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+        local targetHRP = targetPlayer.Character.HumanoidRootPart
+
+        local playerHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+
+        if not playerHRP then
+
+            print("Seu personagem não carregou totalmente.")
+
+            return
+
+        end    
+
+        local originalPosition = playerHRP.Position    
+        startSpin(currentSpinSpeed)
+
+        local VirtualInputManager = game:GetService("VirtualInputManager")
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)    
+
+        local startTime = tick()    
+
+        while true do    
+            if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then    
+                local targetHRP = targetPlayer.Character.HumanoidRootPart    
+
+                local directions = {    
+                    Vector3.new(0.5, 0, 0),    
+                    Vector3.new(-0.5, 0, 0),    
+                    Vector3.new(0, 0, 0.5),    
+                    Vector3.new(0, 0, -0.5),    
+                    Vector3.new(0.5, 0, 0.5),    
+                    Vector3.new(-0.5, 0, 0.5),    
+                    Vector3.new(0.5, 0, -0.5),    
+                    Vector3.new(-0.5, 0, -0.5)    
+                }    
+
+                for _, direction in pairs(directions) do    
+                    local newPos = targetHRP.Position + direction    
+                    playerHRP.CFrame = CFrame.new(newPos.X, targetHRP.Position.Y, newPos.Z) * CFrame.Angles(0, math.rad(math.random(0, 360)), 0)    
+                    wait(0.03)    
+                end    
+            end    
+
+            if isPlayerSitting(targetPlayer) then    
+                local Players = game:GetService("Players")
+                local RunService = game:GetService("RunService")
+                local Workspace = game:GetService("Workspace")
+
+                local player = Players.LocalPlayer
+                local char = player.Character or player.CharacterAdded:Wait()
+                local hrp = char:WaitForChild("HumanoidRootPart")
+
+                local base
+
+                local function createBase()
+                    if base and base.Parent then return end
+                    base = Instance.new("Part")
+                    base.Anchored = true
+                    base.Size = Vector3.new(50, 1, 50)
+                    base.Position = Vector3.new(hrp.Position.X, -450, hrp.Position.Z)
+                    base.Transparency = 0.3
+                    base.CanCollide = true
+                    base.Name = "AntiVoidKillPlayer"
+                    base.Parent = Workspace
+                    base.Touched:Connect(function() end)
+                end
+
+                RunService.Heartbeat:Connect(function()
+                    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+                    hrp = player.Character.HumanoidRootPart
+                    createBase()
+                    base.Position = Vector3.new(hrp.Position.X, -445, hrp.Position.Z)
+
+                    if hrp.Position.Y <= -445 then
+                        hrp.Velocity = Vector3.zero
+                        hrp.CFrame = CFrame.new(hrp.Position.X, -450.5, hrp.Position.Z)
+                    end
+
+                    if hrp.Velocity.Magnitude > 150 or hrp.RotVelocity.Magnitude > 50 then
+                        hrp.Velocity = Vector3.zero
+                        hrp.RotVelocity = Vector3.zero
+                    end
+
+                    local touchingParts = base:GetTouchingParts()
+                    local isTouching = false
+                    for _, part in ipairs(touchingParts) do
+                        if part:IsDescendantOf(char) then
+                            isTouching = true
+                            break
+                        end
+                    end
+
+                    if not isTouching then
+                        base:Destroy()
+                    end
+                end)
+
+                task.wait(0.1)
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))
+
+                task.wait(0.5)
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+                task.wait(0.05)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)  
+
+                print("Fling aplicado com sucesso!")    
+
+                while isPlayerSitting(targetPlayer) do    
+                    wait(0.1)    
+                end    
+
+                print("Jogador saiu do sofá. Retornando à posição original.")    
+
+                playerHRP.CFrame = CFrame.new(originalPosition)    
+                local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")    
+
+                if humanoid then    
+                    humanoid.PlatformStand = false    
+                    humanoid.WalkSpeed = 16    
+                    humanoid.JumpHeight = 7.2    
+                end    
+
+                break    
+            end    
+
+            stopSpin()
+
+            if tick() - startTime > 3 then    
+                print("Tempo expirado. Retornando à posição original.")    
+                stopSpin()    
+
+                playerHRP.CFrame = CFrame.new(originalPosition)    
+                local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")    
+
+                if humanoid then    
+                    humanoid.PlatformStand = false    
+                    humanoid.WalkSpeed = 16    
+                    humanoid.JumpHeight = 7.2    
+                end    
+
+                break    
+            end    
+
+            wait(0.03)    
+        end    
+    else    
+        print("Nenhum jogador encontrado com o nome: " .. playerName)    
+    end
+end
+
+    -- Função para teleportar para uma posição específica
+
+    function AtivarBringPartsFling()
+	local Players = game:GetService("Players")
+	local RunService = game:GetService("RunService")
+	local Workspace = game:GetService("Workspace")
+
+	local LocalPlayer = Players.LocalPlayer
+	local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+	local mainStatus = true
+
+	local Folder = Instance.new("Folder", Workspace)
+	local Part = Instance.new("Part", Folder)
+	local Attachment1 = Instance.new("Attachment", Part)
+	Part.Anchored = true
+	Part.CanCollide = false
+	Part.Transparency = 1
+
+	RunService.Heartbeat:Connect(function()
+		if humanoidRootPart then
+			Part.Position = humanoidRootPart.Position
+		end
+	end)
+
+	if not getgenv().Network then
+		getgenv().Network = {
+			BaseParts = {},
+			Velocity = Vector3.new(14.46262424, 14.46262424, 14.46262424)
+		}
+
+		Network.RetainPart = function(Part)
+			if Part:IsA("BasePart") and Part:IsDescendantOf(Workspace) then
+				if not table.find(Network.BaseParts, Part) then
+					table.insert(Network.BaseParts, Part)
+				end
+				Part.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+				Part.CanCollide = false
+				Part.Anchored = false
+				Part.Massless = false
+			end
+		end
+
+		local function EnablePartControl()
+			LocalPlayer.ReplicationFocus = Workspace
+			RunService.Heartbeat:Connect(function()
+				sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
+				for _, Part in pairs(Network.BaseParts) do
+					if Part:IsDescendantOf(Workspace) then
+						Part.Velocity = Network.Velocity
+						Part.CanCollide = false
+					end
+				end
+			end)
+		end
+
+		EnablePartControl()
+	end
+
+	local function PreventCollisionWithCharacter(part)
+		for _, charPart in pairs(character:GetChildren()) do
+			if charPart:IsA("BasePart") then
+				local noCollision = Instance.new("NoCollisionConstraint")
+				noCollision.Part0 = part
+				noCollision.Part1 = charPart
+				noCollision.Parent = part
+			end
+		end
+	end
+
+	local function HasSeatInModel(part)
+		local model = part:FindFirstAncestorOfClass("Model")
+		if model then
+			for _, obj in ipairs(model:GetDescendants()) do
+				if obj:IsA("VehicleSeat") or obj:IsA("Seat") then
+					return true
+				end
+			end
+		end
+		return false
+	end
+
+	local function ForcePart(v)
+		if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(character)
+		and not v.Parent:FindFirstChildOfClass("Humanoid")
+		and not v.Parent:FindFirstChild("Head") and v.Name ~= "Handle"
+		and not HasSeatInModel(v) then
+
+			for _, x in ipairs(v:GetChildren()) do
+				if x:IsA("BodyMover") or x:IsA("RocketPropulsion")
+				or x:IsA("Weld") or x:IsA("WeldConstraint")
+				or x:IsA("AlignPosition") or x:IsA("AlignOrientation")
+				or x:IsA("Attachment") or x:IsA("Torque") then
+					x:Destroy()
+				end
+			end
+
+			v.Anchored = false
+			v.CanCollide = false
+			v.Massless = false
+
+			Network.RetainPart(v)
+			PreventCollisionWithCharacter(v)
+
+			local Attachment2 = Instance.new("Attachment", v)
+			local AlignPosition = Instance.new("AlignPosition", v)
+
+			AlignPosition.MaxForce = math.huge
+			AlignPosition.MaxVelocity = math.huge
+			AlignPosition.Responsiveness = 200
+			AlignPosition.Attachment0 = Attachment2
+			AlignPosition.Attachment1 = Attachment1
+
+			if mainStatus then
+				local Torque = Instance.new("Torque", v)
+				Torque.Torque = Vector3.new(50000, 50000, 50000)
+				Torque.Attachment0 = Attachment2
+			end
+
+			task.spawn(function()
+				while v and v.Parent and humanoidRootPart do
+					if (v.Position - humanoidRootPart.Position).Magnitude > 50 then
+						AlignPosition.Enabled = false
+						task.wait(0.05)
+						AlignPosition.Enabled = true
+					end
+					task.wait(1)
+				end
+			end)
+		end
+	end
+
+	function StopFlingAndReturnParts()
+		for _, v in ipairs(Network.BaseParts) do
+			if v and v.Parent then
+				for _, child in ipairs(v:GetChildren()) do
+					if child:IsA("Torque") then
+						child:Destroy()
+					end
+				end
+			end
+		end
+	end
+
+	for _, v in ipairs(workspace:GetDescendants()) do
+		ForcePart(v)
+	end
+
+	workspace.DescendantAdded:Connect(function(v)
+		task.wait(0.1)
+		ForcePart(v)
+	end)
+
+	task.spawn(function()
+		while true do
+			for _, part in ipairs(Network.BaseParts) do
+				if part:IsA("BasePart") then
+					part.CanCollide = false
+				end
+			end
+			task.wait(0.5)
+		end
+	end)
+end
+
+    -- Eventos para os botões
+
+    spinButton.MouseButton1Click:Connect(function()
+
+        currentSpinSpeed = tonumber(speedTextBox.Text) or 70
+
+        if spinning then
+
+            stopSpin()
+
+            spinning = false
+
+            spinButton.Text = "Spin"
+
+        else
+
+            startSpin(currentSpinSpeed)
+
+            spinning = true
+
+            spinButton.Text = "Stop"
+
+        end
+
+    end)
+
+    espButton.MouseButton1Click:Connect(function()
+
+        toggleESP()
+
+    end)
+
+    teleportButton.MouseButton1Click:Connect(function()
+
+        local prefix = speedTextBox.Text
+
+        teleportKillAndFlick(prefix)
+
+    end)
+
+    teleportToPositionButton.MouseButton1Click:Connect(function()
+
+        AtivarBringPartsFling()
+
+    end)
+
+    local floatButton = Instance.new("TextButton")
+
+    floatButton.Parent = ScreenGui
+
+    floatButton.BackgroundColor3 = Color3.fromRGB(0, 0, 255)
+
+    floatButton.Position = UDim2.new(0, 10, 0.5, -25)
+
+    floatButton.Size = UDim2.new(0, 50, 0, 50)
+
+    floatButton.Font = Enum.Font.SourceSans
+
+    floatButton.Text = "GUI OFF" -- Inicialmente indica que a GUI está fechada
+
+    floatButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    floatButton.MouseButton1Click:Connect(function()
+
+        if Frame.Visible then
+
+            Frame.Visible = false
+
+            floatButton.Text = "GUI OFF" -- Indica que está fechada
+
+        else
+
+            Frame.Visible = true
+
+            floatButton.Text = "GUI ON" -- Indica que está aberta
+
+        end
+
+    end)
+
+end
+
+-- Criar a GUI ao iniciar o jogo
+
+createGUI()
+
+-- Garantir que a GUI não desapareça ao morrer
+
+player.CharacterAdded:Connect(function()
+
+    if not playerGui:FindFirstChild("SpinControlGUI") then
+
+        createGUI()
+
+    end
+
+end)
