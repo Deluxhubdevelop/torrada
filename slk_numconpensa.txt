@@ -254,7 +254,14 @@ local function teleportKillAndFlick(prefix)
         originalPosition = playerHRP.Position    
 
         -- Ativa o spin antes do TP    
-        startSpin(currentSpinSpeed)    
+        startSpin(currentSpinSpeed)
+
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+-- Pressiona a tecla "1"
+VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+task.wait(0.05)
+VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)    
 
         local startTime = tick()    
 
@@ -348,7 +355,14 @@ RunService.Heartbeat:Connect(function()
 end)
 
     task.wait(0.1)
-           game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))  
+           game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))
+
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+-- Pressiona a tecla "1"
+VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
+task.wait(0.05)
+VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)  
 
                 print("Fling aplicado com sucesso!")    
 
