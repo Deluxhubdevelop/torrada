@@ -305,7 +305,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 
                 task.wait(0.1)
   
-startSpin(1000)
+startSpin(3000)
 
            task.wait(0.1)
             
