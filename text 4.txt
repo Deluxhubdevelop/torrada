@@ -303,7 +303,13 @@ startSpin(1000000000000)
 
            task.wait(0.1)
             
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0))  
+                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0)) 
+
+task.wait(3)
+
+           stopSpin()
+
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0))
 
                 print("Fling aplicado com sucesso!")    
 
