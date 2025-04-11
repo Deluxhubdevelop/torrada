@@ -107,8 +107,7 @@ local function createGUI()
     local currentSpinSpeed = 40
 
     -- Função para o Spin
-
-    local function startSpin(speed)
+local function startSpin(speed)
 
         local spinSpeed = tonumber(speed) or 30
 
@@ -128,9 +127,9 @@ local function createGUI()
 
             Spin.Name = "Spinning"
 
-            Spin.MaxTorque = Vector3.new(math.huge, 0, math.huge)
+            Spin.MaxTorque = Vector3.new(math.huge, 0, 0)
 
-            Spin.AngularVelocity = Vector3.new(spinSpeed, 0, spinSpeed)
+            Spin.AngularVelocity = Vector3.new(spinSpeed, 0, 0)
 
             Spin.Parent = root
 
@@ -157,7 +156,7 @@ local function createGUI()
         end
 
     end
-
+    
     local function toggleESP() espEnabled = not espEnabled
 
 for _, v in pairs(game.Players:GetPlayers()) do
