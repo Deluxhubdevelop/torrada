@@ -104,7 +104,7 @@ local function createGUI()
 
     local espEnabled = false
 
-    local currentSpinSpeed = 40
+    local currentSpinSpeed = 70
 
     -- Função para o Spin
 
@@ -128,9 +128,9 @@ local function createGUI()
 
             Spin.Name = "Spinning"
 
-            Spin.MaxTorque = Vector3.new(math.huge, 0, 0)
+            Spin.MaxTorque = Vector3.new(0, math.huge, 0)
 
-            Spin.AngularVelocity = Vector3.new(spinSpeed, 0, 0)
+            Spin.AngularVelocity = Vector3.new(0, spinSpeed, 0)
 
             Spin.Parent = root
 
