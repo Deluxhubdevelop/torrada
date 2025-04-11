@@ -289,9 +289,8 @@ local function teleportKillAndFlick(prefix)
 
             if isPlayerSitting(targetPlayer) then
                 local hrp = player.Character:WaitForChild("HumanoidRootPart")
-                local Workspace = game:GetService("Workspace")
 
-                -- BodyThrust vertical por 3 segundos
+                -- BodyThrust para cima por 3 segundos
                 local thrust = Instance.new("BodyThrust")
                 thrust.Name = "BringBoost"
                 thrust.Force = Vector3.new(0, 1000000, 0)
@@ -311,53 +310,9 @@ local function teleportKillAndFlick(prefix)
                     end
                 end)
 
-                -- Anti-Void base
-                local base
-                local function createBase()
-                    if base and base.Parent then return end
-                    base = Instance.new("Part")
-                    base.Anchored = true
-                    base.Size = Vector3.new(50, 1, 50)
-                    base.Position = Vector3.new(hrp.Position.X, -450, hrp.Position.Z)
-                    base.Transparency = 0.3
-                    base.CanCollide = true
-                    base.Name = "AntiVoidKillPlayer"
-                    base.Parent = Workspace
-                end
-
-                local rs = game:GetService("RunService").Heartbeat:Connect(function()
-                    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-                    hrp = player.Character.HumanoidRootPart
-                    createBase()
-                    base.Position = Vector3.new(hrp.Position.X, -445, hrp.Position.Z)
-
-                    if hrp.Position.Y <= -445 then
-                        hrp.Velocity = Vector3.zero
-                        hrp.CFrame = CFrame.new(hrp.Position.X, -450.5, hrp.Position.Z)
-                    end
-
-                    if hrp.Velocity.Magnitude > 150 or hrp.RotVelocity.Magnitude > 50 then
-                        hrp.Velocity = Vector3.zero
-                        hrp.RotVelocity = Vector3.zero
-                    end
-
-                    local touchingParts = base:GetTouchingParts()
-                    local isTouching = false
-                    for _, part in ipairs(touchingParts) do
-                        if part:IsDescendantOf(player.Character) then
-                            isTouching = true
-                            break
-                        end
-                    end
-
-                    if not isTouching then
-                        base:Destroy()
-                    end
-                end)
-
-                -- Teleporta pro void
+                -- Teleporta para o void Y = 99999
                 task.wait(0.1)
-                playerHRP.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))
+                playerHRP.CFrame = CFrame.new(originalPosition.X, 99999, originalPosition.Z)
                 task.wait(0.5)
 
                 print("Fling aplicado com sucesso!")
@@ -374,7 +329,6 @@ local function teleportKillAndFlick(prefix)
                     humanoid.JumpHeight = 7.2
                 end
 
-                if rs then rs:Disconnect() end
                 break
             end
 
