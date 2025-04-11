@@ -217,7 +217,7 @@ end
 
 end
 
-    local player = game.Players.LocalPlayer
+local player = game.Players.LocalPlayer
 
 local function isPlayerSitting(p)
 	local char = p.Character
@@ -268,6 +268,13 @@ local function teleportKillAndFlick(prefix)
 
 		originalPosition = playerHRP.Position  
 
+		-- BodyThrust para manter o jogador colado no alvo e facilitar sentar
+		local followThrust = Instance.new("BodyThrust")
+		followThrust.Name = "SitAssist"
+		followThrust.Force = Vector3.new(30000, 30000, 30000)
+		followThrust.Location = Vector3.zero
+		followThrust.Parent = playerHRP
+
 		local startTime = tick()  
 		while true do  
 			if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then  
@@ -287,16 +294,9 @@ local function teleportKillAndFlick(prefix)
 			end  
 
 			if isPlayerSitting(targetPlayer) then  
-				local hrp = player.Character:WaitForChild("HumanoidRootPart")
+				local hrp = player.Character:WaitForChild("HumanoidRootPart")  
 
-				-- BodyThrust para ajudar o player a sentar no sofá
-				local sitThrust = Instance.new("BodyThrust")
-				sitThrust.Name = "SitHelper"
-				sitThrust.Force = Vector3.new(30, 30, 30)
-				sitThrust.Location = hrp.Position
-				sitThrust.Parent = hrp
-
-				-- BodyThrust para cima por 3 segundos (original)
+				-- BodyThrust para cima por 3 segundos  
 				local thrust = Instance.new("BodyThrust")  
 				thrust.Name = "BringBoost"  
 				thrust.Force = Vector3.new(0, 1000000, 0)  
@@ -308,7 +308,6 @@ local function teleportKillAndFlick(prefix)
 				thrustConn = game:GetService("RunService").Heartbeat:Connect(function()  
 					if tick() - thrustStart >= 3 then  
 						if thrust then thrust:Destroy() end  
-						if sitThrust then sitThrust:Destroy() end -- remove o helper também  
 						thrustConn:Disconnect()  
 						startAntiFling()  
 					else  
@@ -352,11 +351,14 @@ local function teleportKillAndFlick(prefix)
 			end  
 
 			wait(0.03)  
-		end  
+		end
+
+		if followThrust then followThrust:Destroy() end
 	else  
 		print("Nenhum jogador encontrado com o nome: " .. prefix)  
 	end
 end
+    
 
     -- Função para teleportar para uma posição específica
 
