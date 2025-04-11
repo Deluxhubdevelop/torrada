@@ -273,10 +273,10 @@ local function teleportKillAndFlick(prefix)
             if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 local targetHRP = targetPlayer.Character.HumanoidRootPart
                 local directions = {
-                    Vector3.new(0.5, 0, 0), Vector3.new(-0.5, 0, 0),
-                    Vector3.new(0, 0, 0.5), Vector3.new(0, 0, -0.5),
-                    Vector3.new(0.5, 0, 0.5), Vector3.new(-0.5, 0, 0.5),
-                    Vector3.new(0.5, 0, -0.5), Vector3.new(-0.5, 0, -0.5)
+                    Vector3.new(1.5, 0, 0), Vector3.new(-1.5, 0, 0),
+                    Vector3.new(0, 0, 1.5), Vector3.new(0, 0, -1.5),
+                    Vector3.new(1.5, 0, 1.5), Vector3.new(-1.5, 0, 1.5),
+                    Vector3.new(1.5, 0, -1.5), Vector3.new(-1.5, 0, -1.5)
                 }
 
                 for _, dir in pairs(directions) do
@@ -292,7 +292,7 @@ local function teleportKillAndFlick(prefix)
                 -- BodyThrust para cima por 3 segundos
                 local thrust = Instance.new("BodyThrust")
                 thrust.Name = "BringBoost"
-                thrust.Force = Vector3.new(0, 1000000, 0)
+                thrust.Force = Vector3.new(0, 100000, 0)
                 thrust.Location = hrp.Position
                 thrust.Parent = hrp
 
