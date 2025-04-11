@@ -220,134 +220,142 @@ end
     local player = game.Players.LocalPlayer
 
 local function isPlayerSitting(p)
-    local char = p.Character
-    if char then
-        local humanoid = char:FindFirstChild("Humanoid")
-        if humanoid and humanoid.SeatPart then
-            return true
-        end
-    end
-    return false
+	local char = p.Character
+	if char then
+		local humanoid = char:FindFirstChild("Humanoid")
+		if humanoid and humanoid.SeatPart then
+			return true
+		end
+	end
+	return false
 end
 
 local antiFlingConnection = nil
 local function startAntiFling()
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
+	local char = player.Character or player.CharacterAdded:Wait()
+	local hrp = char:WaitForChild("HumanoidRootPart")
 
-    if antiFlingConnection then antiFlingConnection:Disconnect() end
+	if antiFlingConnection then antiFlingConnection:Disconnect() end  
 
-    for _, obj in ipairs(hrp:GetChildren()) do
-        if obj:IsA("BodyVelocity") or obj:IsA("BodyAngularVelocity") or obj:IsA("BodyGyro") then
-            obj:Destroy()
-        end
-    end
+	for _, obj in ipairs(hrp:GetChildren()) do  
+		if obj:IsA("BodyVelocity") or obj:IsA("BodyAngularVelocity") or obj:IsA("BodyGyro") then  
+			obj:Destroy()  
+		end  
+	end  
 
-    antiFlingConnection = game:GetService("RunService").Heartbeat:Connect(function()
-        if hrp.Velocity.Magnitude > 100 then
-            hrp.Velocity = hrp.Velocity.Unit * 20
-        end
-    end)
+	antiFlingConnection = game:GetService("RunService").Heartbeat:Connect(function()  
+		if hrp.Velocity.Magnitude > 100 then  
+			hrp.Velocity = hrp.Velocity.Unit * 20  
+		end  
+	end)
 end
 
 local function teleportKillAndFlick(prefix)
-    local targetPlayer = nil
-    local originalPosition = nil
+	local targetPlayer = nil
+	local originalPosition = nil
 
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v.Name:sub(1, #prefix):lower() == prefix:lower() then
-            targetPlayer = v
-            break
-        end
-    end
+	for _, v in pairs(game.Players:GetPlayers()) do  
+		if v.Name:sub(1, #prefix):lower() == prefix:lower() then  
+			targetPlayer = v  
+			break  
+		end  
+	end  
 
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local targetHRP = targetPlayer.Character.HumanoidRootPart
-        local playerHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-        if not playerHRP then return end
+	if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then  
+		local targetHRP = targetPlayer.Character.HumanoidRootPart  
+		local playerHRP = player.Character and player.Character:FindFirstChild("HumanoidRootPart")  
+		if not playerHRP then return end  
 
-        originalPosition = playerHRP.Position
+		originalPosition = playerHRP.Position  
 
-        local startTime = tick()
-        while true do
-            if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local targetHRP = targetPlayer.Character.HumanoidRootPart
-                local directions = {
-                    Vector3.new(1.5, 0, 0), Vector3.new(-1.5, 0, 0),
-                    Vector3.new(0, 0, 1.5), Vector3.new(0, 0, -1.5),
-                    Vector3.new(1.5, 0, 1.5), Vector3.new(-1.5, 0, 1.5),
-                    Vector3.new(1.5, 0, -1.5), Vector3.new(-1.5, 0, -1.5)
-                }
+		local startTime = tick()  
+		while true do  
+			if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then  
+				local targetHRP = targetPlayer.Character.HumanoidRootPart  
+				local directions = {  
+					Vector3.new(0.5, 0, 0), Vector3.new(-0.5, 0, 0),  
+					Vector3.new(0, 0, 0.5), Vector3.new(0, 0, -0.5),  
+					Vector3.new(0.5, 0, 0.5), Vector3.new(-0.5, 0, 0.5),  
+					Vector3.new(0.5, 0, -0.5), Vector3.new(-0.5, 0, -0.5)  
+				}  
 
-                for _, dir in pairs(directions) do
-                    local newPos = targetHRP.Position + dir
-                    playerHRP.CFrame = CFrame.new(newPos.X, targetHRP.Position.Y, newPos.Z) * CFrame.Angles(0, math.rad(math.random(0, 360)), 0)
-                    wait(0.03)
-                end
-            end
+				for _, dir in pairs(directions) do  
+					local newPos = targetHRP.Position + dir  
+					playerHRP.CFrame = CFrame.new(newPos.X, targetHRP.Position.Y, newPos.Z) * CFrame.Angles(0, math.rad(math.random(0, 360)), 0)  
+					wait(0.03)  
+				end  
+			end  
 
-            if isPlayerSitting(targetPlayer) then
-                local hrp = player.Character:WaitForChild("HumanoidRootPart")
+			if isPlayerSitting(targetPlayer) then  
+				local hrp = player.Character:WaitForChild("HumanoidRootPart")
 
-                -- BodyThrust para cima por 3 segundos
-                local thrust = Instance.new("BodyThrust")
-                thrust.Name = "BringBoost"
-                thrust.Force = Vector3.new(0, 100000, 0)
-                thrust.Location = hrp.Position
-                thrust.Parent = hrp
+				-- BodyThrust para ajudar o player a sentar no sofá
+				local sitThrust = Instance.new("BodyThrust")
+				sitThrust.Name = "SitHelper"
+				sitThrust.Force = Vector3.new(30, 30, 30)
+				sitThrust.Location = hrp.Position
+				sitThrust.Parent = hrp
 
-                local thrustStart = tick()
-                local thrustConn
-                thrustConn = game:GetService("RunService").Heartbeat:Connect(function()
-                    if tick() - thrustStart >= 3 then
-                        if thrust then thrust:Destroy() end
-                        thrustConn:Disconnect()
-                        startAntiFling()
-                    else
-                        thrust.Force = Vector3.new(0, 1000000, 0)
-                        thrust.Location = hrp.Position
-                    end
-                end)
+				-- BodyThrust para cima por 3 segundos (original)
+				local thrust = Instance.new("BodyThrust")  
+				thrust.Name = "BringBoost"  
+				thrust.Force = Vector3.new(0, 1000000, 0)  
+				thrust.Location = hrp.Position  
+				thrust.Parent = hrp  
 
-                -- Teleporta para o void Y = 99999
-                task.wait(0.1)
-                playerHRP.CFrame = CFrame.new(originalPosition.X, 99999, originalPosition.Z)
-                task.wait(0.5)
+				local thrustStart = tick()  
+				local thrustConn  
+				thrustConn = game:GetService("RunService").Heartbeat:Connect(function()  
+					if tick() - thrustStart >= 3 then  
+						if thrust then thrust:Destroy() end  
+						if sitThrust then sitThrust:Destroy() end -- remove o helper também  
+						thrustConn:Disconnect()  
+						startAntiFling()  
+					else  
+						thrust.Force = Vector3.new(0, 1000000, 0)  
+						thrust.Location = hrp.Position  
+					end  
+				end)  
 
-                print("Fling aplicado com sucesso!")
+				-- Teleporta para o void Y = 99999  
+				task.wait(0.1)  
+				playerHRP.CFrame = CFrame.new(originalPosition.X, 99999, originalPosition.Z)  
+				task.wait(0.5)  
 
-                while isPlayerSitting(targetPlayer) do wait(0.1) end
+				print("Fling aplicado com sucesso!")  
 
-                print("Jogador saiu do sofá. Retornando à posição original.")
-                playerHRP.CFrame = CFrame.new(originalPosition)
+				while isPlayerSitting(targetPlayer) do wait(0.1) end  
 
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.PlatformStand = false
-                    humanoid.WalkSpeed = 16
-                    humanoid.JumpHeight = 7.2
-                end
+				print("Jogador saiu do sofá. Retornando à posição original.")  
+				playerHRP.CFrame = CFrame.new(originalPosition)  
 
-                break
-            end
+				local humanoid = player.Character:FindFirstChild("Humanoid")  
+				if humanoid then  
+					humanoid.PlatformStand = false  
+					humanoid.WalkSpeed = 16  
+					humanoid.JumpHeight = 7.2  
+				end  
 
-            if tick() - startTime > 5 then
-                print("Tempo expirado. Retornando à posição original.")
-                playerHRP.CFrame = CFrame.new(originalPosition)
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                if humanoid then
-                    humanoid.PlatformStand = false
-                    humanoid.WalkSpeed = 16
-                    humanoid.JumpHeight = 7.2
-                end
-                break
-            end
+				break  
+			end  
 
-            wait(0.03)
-        end
-    else
-        print("Nenhum jogador encontrado com o nome: " .. prefix)
-    end
+			if tick() - startTime > 5 then  
+				print("Tempo expirado. Retornando à posição original.")  
+				playerHRP.CFrame = CFrame.new(originalPosition)  
+				local humanoid = player.Character:FindFirstChild("Humanoid")  
+				if humanoid then  
+					humanoid.PlatformStand = false  
+					humanoid.WalkSpeed = 16  
+					humanoid.JumpHeight = 7.2  
+				end  
+				break  
+			end  
+
+			wait(0.03)  
+		end  
+	else  
+		print("Nenhum jogador encontrado com o nome: " .. prefix)  
+	end
 end
 
     -- Função para teleportar para uma posição específica
