@@ -324,6 +324,43 @@ task.wait(0.1)
 
 game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(originalPosition + Vector3.new(0, 5, 0))
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local function antiFling()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    
+    if not hrp then return end
+
+    -- Remove BodyVelocity / Angular etc
+    for _, obj in ipairs(hrp:GetChildren()) do
+        if obj:IsA("BodyVelocity") or obj:IsA("BodyAngularVelocity") or obj:IsA("BodyGyro") then
+            obj:Destroy()
+        end
+    end
+
+    -- Cria BodyVelocity com limite de velocidade
+    local safeVel = Instance.new("BodyVelocity")
+    safeVel.Name = "AntiFlingVel"
+    safeVel.Velocity = Vector3.zero
+    safeVel.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    safeVel.P = 1250
+    safeVel.Parent = hrp
+
+    -- Atualiza constantemente para travar a velocidade em 20 max
+    RunService.Heartbeat:Connect(function()
+        if hrp and hrp.Velocity.Magnitude > 20 then
+            hrp.Velocity = hrp.Velocity.Unit * 20
+        end
+    end)
+end
+
+antiFling()
+
+tasm.wait(4)
+
                 print("Fling aplicado com sucesso!")    
 
                 -- Aguarda o jogador sair do sofá para restaurá-lo    
