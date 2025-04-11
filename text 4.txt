@@ -330,29 +330,19 @@ local LocalPlayer = Players.LocalPlayer
 
 local function antiFling()
     local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    
-    if not hrp then return end
+    local hrp = char:WaitForChild("HumanoidRootPart")
 
-    -- Remove BodyVelocity / Angular etc
+    -- Remove BodyVelocity e BodyAngularVelocity
     for _, obj in ipairs(hrp:GetChildren()) do
         if obj:IsA("BodyVelocity") or obj:IsA("BodyAngularVelocity") or obj:IsA("BodyGyro") then
             obj:Destroy()
         end
     end
 
-    -- Cria BodyVelocity com limite de velocidade
-    local safeVel = Instance.new("BodyVelocity")
-    safeVel.Name = "AntiFlingVel"
-    safeVel.Velocity = Vector3.zero
-    safeVel.MaxForce = Vector3.new(1e5, 1e5, 1e5)
-    safeVel.P = 1250
-    safeVel.Parent = hrp
-
-    -- Atualiza constantemente para travar a velocidade em 20 max
+    -- Cria sistema que só corrige velocidade absurda (acima de 100)
     RunService.Heartbeat:Connect(function()
-        if hrp and hrp.Velocity.Magnitude > 20 then
-            hrp.Velocity = hrp.Velocity.Unit * 20
+        if hrp and hrp.Velocity.Magnitude > 100 then
+            hrp.Velocity = hrp.Velocity.Unit * 20 -- Reduz com suavidade
         end
     end)
 end
