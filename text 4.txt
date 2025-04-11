@@ -218,10 +218,12 @@ end
 
 end
 
-    local function isPlayerSitting(player)
-    local character = player.Character
-    if character then
-        local humanoid = character:FindFirstChild("Humanoid")
+    local player = game.Players.LocalPlayer
+
+local function isPlayerSitting(p)
+    local char = p.Character
+    if char then
+        local humanoid = char:FindFirstChild("Humanoid")
         if humanoid and humanoid.SeatPart then
             return true
         end
@@ -231,7 +233,6 @@ end
 
 local antiFlingConnection = nil
 local function startAntiFling()
-    local player = game.Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
 
@@ -267,19 +268,11 @@ local function teleportKillAndFlick(prefix)
         if not playerHRP then return end
 
         originalPosition = playerHRP.Position
-        startSpin(currentSpinSpeed)
-
-        local VirtualInputManager = game:GetService("VirtualInputManager")
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-        task.wait(0.05)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
 
         local startTime = tick()
-
         while true do
             if targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 local targetHRP = targetPlayer.Character.HumanoidRootPart
-
                 local directions = {
                     Vector3.new(0.5, 0, 0), Vector3.new(-0.5, 0, 0),
                     Vector3.new(0, 0, 0.5), Vector3.new(0, 0, -0.5),
@@ -295,19 +288,30 @@ local function teleportKillAndFlick(prefix)
             end
 
             if isPlayerSitting(targetPlayer) then
-                local Workspace = game:GetService("Workspace")
                 local hrp = player.Character:WaitForChild("HumanoidRootPart")
+                local Workspace = game:GetService("Workspace")
 
+                -- BodyThrust vertical por 3 segundos
                 local thrust = Instance.new("BodyThrust")
-thrust.Name = "BringBoost"
-thrust.Force = Vector3.new(0, 500000, 0) -- impulso só para cima
-thrust.Location = hrp.Position
-thrust.Parent = hrp
+                thrust.Name = "BringBoost"
+                thrust.Force = Vector3.new(0, 1000000, 0)
+                thrust.Location = hrp.Position
+                thrust.Parent = hrp
 
-                -- Anti-Fling iniciado
-                startAntiFling()
+                local thrustStart = tick()
+                local thrustConn
+                thrustConn = game:GetService("RunService").Heartbeat:Connect(function()
+                    if tick() - thrustStart >= 3 then
+                        if thrust then thrust:Destroy() end
+                        thrustConn:Disconnect()
+                        startAntiFling()
+                    else
+                        thrust.Force = Vector3.new(0, 1000000, 0)
+                        thrust.Location = hrp.Position
+                    end
+                end)
 
-                -- Base AntiVoid
+                -- Anti-Void base
                 local base
                 local function createBase()
                     if base and base.Parent then return end
@@ -321,7 +325,9 @@ thrust.Parent = hrp
                     base.Parent = Workspace
                 end
 
-
+                local rs = game:GetService("RunService").Heartbeat:Connect(function()
+                    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
+                    hrp = player.Character.HumanoidRootPart
                     createBase()
                     base.Position = Vector3.new(hrp.Position.X, -445, hrp.Position.Z)
 
@@ -349,22 +355,19 @@ thrust.Parent = hrp
                     end
                 end)
 
+                -- Teleporta pro void
                 task.wait(0.1)
-                playerHRP.CFrame = CFrame.new(originalPosition + Vector3.new(0, 2, 0))
-
+                playerHRP.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))
                 task.wait(0.5)
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
-                task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.One, false, game)
 
                 print("Fling aplicado com sucesso!")
 
                 while isPlayerSitting(targetPlayer) do wait(0.1) end
 
                 print("Jogador saiu do sofá. Retornando à posição original.")
-
                 playerHRP.CFrame = CFrame.new(originalPosition)
-                local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+
+                local humanoid = player.Character:FindFirstChild("Humanoid")
                 if humanoid then
                     humanoid.PlatformStand = false
                     humanoid.WalkSpeed = 16
@@ -372,17 +375,13 @@ thrust.Parent = hrp
                 end
 
                 if rs then rs:Disconnect() end
-                if thrust and thrust.Parent then thrust:Destroy() end
                 break
             end
 
-            stopSpin()
-
-            if tick() - startTime > 3 then
+            if tick() - startTime > 5 then
                 print("Tempo expirado. Retornando à posição original.")
-                stopSpin()
                 playerHRP.CFrame = CFrame.new(originalPosition)
-                local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+                local humanoid = player.Character:FindFirstChild("Humanoid")
                 if humanoid then
                     humanoid.PlatformStand = false
                     humanoid.WalkSpeed = 16
