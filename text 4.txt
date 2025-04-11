@@ -271,7 +271,7 @@ local function teleportKillAndFlick(prefix)
 		-- BodyThrust para manter o jogador colado no alvo e facilitar sentar
 		local followThrust = Instance.new("BodyThrust")
 		followThrust.Name = "SitAssist"
-		followThrust.Force = Vector3.new(30000, 30000, 30000)
+		followThrust.Force = Vector3.new(20, 20, 20)
 		followThrust.Location = Vector3.zero
 		followThrust.Parent = playerHRP
 
