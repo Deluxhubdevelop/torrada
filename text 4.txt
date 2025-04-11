@@ -298,12 +298,11 @@ local function teleportKillAndFlick(prefix)
                 local Workspace = game:GetService("Workspace")
                 local hrp = player.Character:WaitForChild("HumanoidRootPart")
 
-                -- BodyThrust aplicado ao sentar
                 local thrust = Instance.new("BodyThrust")
-                thrust.Name = "BringBoost"
-                thrust.Force = Vector3.new(0, 2599, 0)
-                thrust.Location = hrp.Position
-                thrust.Parent = hrp
+thrust.Name = "BringBoost"
+thrust.Force = Vector3.new(0, 500000, 0) -- impulso só para cima
+thrust.Location = hrp.Position
+thrust.Parent = hrp
 
                 -- Anti-Fling iniciado
                 startAntiFling()
@@ -322,9 +321,7 @@ local function teleportKillAndFlick(prefix)
                     base.Parent = Workspace
                 end
 
-                local rs = game:GetService("RunService").Heartbeat:Connect(function()
-                    if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then return end
-                    hrp = player.Character.HumanoidRootPart
+
                     createBase()
                     base.Position = Vector3.new(hrp.Position.X, -445, hrp.Position.Z)
 
@@ -353,7 +350,7 @@ local function teleportKillAndFlick(prefix)
                 end)
 
                 task.wait(0.1)
-                playerHRP.CFrame = CFrame.new(originalPosition + Vector3.new(0, -443, 0))
+                playerHRP.CFrame = CFrame.new(originalPosition + Vector3.new(0, 2, 0))
 
                 task.wait(0.5)
                 VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.One, false, game)
