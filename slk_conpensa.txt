@@ -82,7 +82,7 @@ local function createGUI()
 
     teleportButton.Font = Enum.Font.SourceSans
 
-    teleportButton.Text = "jail player"
+    teleportButton.Text = "fling door player"
 
     local teleportToPositionButton = Instance.new("TextButton")
 
