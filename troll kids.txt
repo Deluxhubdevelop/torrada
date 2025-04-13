@@ -1,0 +1,115 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Criar GUI
+local gui = Instance.new("ScreenGui", PlayerGui)
+gui.Name = "BebeFollowerGui"
+gui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 250, 0, 130)
+frame.Position = UDim2.new(0.05, 0, 0.4, 0)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel", frame)
+title.Text = "Bebê Seguidor Troll"
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+
+local textbox = Instance.new("TextBox", frame)
+textbox.PlaceholderText = "Nome do alvo"
+textbox.Size = UDim2.new(0.9, 0, 0, 30)
+textbox.Position = UDim2.new(0.05, 0, 0.35, 0)
+textbox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+textbox.TextColor3 = Color3.new(1,1,1)
+textbox.Font = Enum.Font.Gotham
+textbox.TextSize = 16
+Instance.new("UICorner", textbox).CornerRadius = UDim.new(0, 6)
+
+local botao = Instance.new("TextButton", frame)
+botao.Text = "Ativar Seguir"
+botao.Size = UDim2.new(0.9, 0, 0, 30)
+botao.Position = UDim2.new(0.05, 0, 0.7, 0)
+botao.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+botao.TextColor3 = Color3.new(1,1,1)
+botao.Font = Enum.Font.GothamBold
+botao.TextSize = 16
+Instance.new("UICorner", botao).CornerRadius = UDim.new(0, 6)
+
+-- Controle
+local seguindo = false
+local conexao
+
+-- Spawnar bebê
+local function spawnBaby()
+    local remote = ReplicatedStorage:FindFirstChild("ChildRemote") or ReplicatedStorage:FindFirstChild("ChildEvent")
+    if remote then
+        remote:FireServer("Spawn", true)
+    end
+end
+
+-- Achar bebê
+local function getBaby()
+    for _,v in pairs(LocalPlayer.Character:GetChildren()) do
+        if v:IsA("Model") and v:FindFirstChild("Head") and v:FindFirstChildWhichIsA("Humanoid") then
+            return v
+        end
+    end
+end
+
+-- Achar player
+local function encontrarPlayer(nome)
+    for _,plr in pairs(Players:GetPlayers()) do
+        if plr.Name:lower():find(nome:lower()) or plr.DisplayName:lower():find(nome:lower()) then
+            return plr
+        end
+    end
+end
+
+-- Botão ativar
+botao.MouseButton1Click:Connect(function()
+    seguindo = not seguindo
+    botao.Text = seguindo and "Desativar Seguir" or "Ativar Seguir"
+
+    if seguindo then
+        spawnBaby()
+        task.wait(1)
+        local bebe = getBaby()
+        local alvo = encontrarPlayer(textbox.Text)
+
+        if bebe and alvo and alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart") then
+            local root = bebe:FindFirstChild("HumanoidRootPart")
+            local humanoid = bebe:FindFirstChildWhichIsA("Humanoid")
+
+            -- Tirar colisão de todas as parts do bebê
+            for _,part in pairs(bebe:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+
+            conexao = RunService.Heartbeat:Connect(function()
+    if not seguindo then return end
+    if alvo.Character and alvo.Character:FindFirstChild("HumanoidRootPart") and root then
+        local alvoRoot = alvo.Character.HumanoidRootPart
+        local offset = alvoRoot.CFrame.RightVector * 2
+        local novaPos = alvoRoot.Position + offset
+        local frente = alvoRoot.CFrame.LookVector
+
+        root.CFrame = CFrame.new(novaPos, novaPos + frente)
+        if humanoid then humanoid:ChangeState(Enum.HumanoidStateType.Physics) end
+        root.Velocity = (novaPos - root.Position).Unit * 50 -- super velocidade de reação
+    end
+end)
