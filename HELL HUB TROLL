@@ -152,6 +152,7 @@ else
 end
 }) -- Este é o fechamento da função
 
+
 TrollTab:AddButton({
     Name = "Desativar Kill",
     Callback = function()
