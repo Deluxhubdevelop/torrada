@@ -146,7 +146,7 @@ end)
 })
 
 TrollTab:AddButton({
-    Name = "Kill Jogador",
+    Name = "fling Jogador",
     Callback = function()
         if selectedPlayer ~= "" then
             local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
