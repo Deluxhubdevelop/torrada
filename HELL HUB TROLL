@@ -61,7 +61,7 @@ local killAtivo = false
 local teleportLoop = nil
 
 TrollTab:AddButton({
-    Name = "Kill Jogador",
+    Name = "Fling Jogador",
     Callback = function()
         if selectedPlayer ~= "" then
             local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
@@ -151,8 +151,7 @@ TrollTab:AddButton({
             print("Selecione um jogador primeiro.")
         end
     end
-})  -- Este é o fechamento correto da função `AddButton`
-
+})  -- Fechamento correto da função `AddButton`
 
 TrollTab:AddButton({
     Name = "Kill Jogador",
