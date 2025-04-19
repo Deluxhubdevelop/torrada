@@ -117,7 +117,7 @@ TrollTab:AddButton({
 
                         playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
                         wait(0.1)
-                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(999998, -495, 5))
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(-999998, 9999999, -9999999))
                     end
 
                     task.wait(0.1)
