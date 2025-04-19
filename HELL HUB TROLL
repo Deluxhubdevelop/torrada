@@ -146,7 +146,7 @@ end)
 })
 
 TrollTab:AddButton({
-    Name = "fling Jogador",
+    Name = "Kill Jogador",
     Callback = function()
         if selectedPlayer ~= "" then
             local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
@@ -190,41 +190,20 @@ TrollTab:AddButton({
                         local offsetX = math.cos(angle) * radius
                         local offsetY = math.sin(angle) * radius
 
-                        -- Fling the player by adding a BodyVelocity
-                        local bodyVelocity = Instance.new("BodyVelocity")
-                        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-                        bodyVelocity.Velocity = Vector3.new(0, 100, 0)
-                        bodyVelocity.Parent = playerCharacter.HumanoidRootPart
-
-                        -- Remove the BodyVelocity after 0.5 seconds
-                        game.Debris:AddItem(bodyVelocity, 0.5)
-
-                        -- Store the original velocity to restore it later
-                        local originalVelocity = playerCharacter.HumanoidRootPart.Velocity
-
-                        -- Anti-Fling: If below void, teleport to safe place
-                        if playerCharacter.HumanoidRootPart.Position.Y <= -450 then
-                            playerCharacter.HumanoidRootPart.Velocity = originalVelocity
-                            playerCharacter.HumanoidRootPart.CFrame = CFrame.new(0, 10, 0)
-                        end
-
-                        -- Orbit and reset position
                         playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
                         wait(0.1)
                         playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(999998, -495, 5))
                     end
-
-                    task.wait(0.1)
                 end)
+
             else
                 print("Jogador não encontrado!")
             end
         else
             print("Selecione um jogador primeiro.")
         end
-    end -- 👈 Fim do Callback function
-}) -- 👈 Fim do AddButton
-
+    end
+})
 
 TrollTab:AddButton({
     Name = "Desativar Kill",
