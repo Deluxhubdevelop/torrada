@@ -64,58 +64,85 @@ TrollTab:AddButton({
     Name = "Kill Jogador",
     Callback = function()
         if selectedPlayer ~= "" then
-    local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local player = game.Players.LocalPlayer
-        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
-
-        local args = {
-            [1] = "PickingTools",
-            [2] = "Couch"
-        }
-
-        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
-
-        local function equiparCouch()
-            local tools = player.Backpack:GetChildren()
-            for _, tool in ipairs(tools) do
-                if tool:IsA("Tool") and tool.Name == "Couch" then
-                    player.Character.Humanoid:EquipTool(tool)
-                end
-            end
-        end
-
-        equiparCouch()
-
-        killAtivo = true
-
-        spawn(function()
-            wait(0.1)
-            equiparCouch()
-        end)
-
-        teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
-            if not killAtivo then return end
-            local playerCharacter = game.Players.LocalPlayer.Character
-            if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
+            local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local player = game.Players.LocalPlayer
                 local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-                local angle = (tick() * 98) % 6.28
-                local radius = 5
-                local offsetX = math.cos(angle) * radius
-                local offsetY = math.sin(angle) * radius
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
 
-                playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
-                wait(0.1)
-                playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(99999, -448, 5))
-            end
-        end)
-    else
-        print("Jogador não encontrado!")
-    end
-else
-    print("Selecione um jogador primeiro.")
+                local args = {
+                    [1] = "PickingTools",
+                    [2] = "Couch"
+                }
+
+                game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+
+                local function equiparCouch()
+                    local tools = player.Backpack:GetChildren()
+                    for _, tool in ipairs(tools) do
+                        if tool:IsA("Tool") and tool.Name == "Couch" then
+                            player.Character.Humanoid:EquipTool(tool)
+                        end
+                    end
+                end
+
+                equiparCouch()
+
+                killAtivo = true
+
+                spawn(function()
+                    wait(0.1)
+                    equiparCouch()
+                end)
+
+                teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
+                    if not killAtivo then return end
+                    local playerCharacter = game.Players.LocalPlayer.Character
+                    if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
+                        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+                        local angle = (tick() * 98) % 6.28
+                        local radius = 5
+                        local offsetX = math.cos(angle) * radius
+                        local offsetY = math.sin(angle) * radius
+
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
+                        wait(0.1)
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(999998, -495, 5))
+                    end
+
+                   task.wait(0.1)
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local hrp = nil
+
+-- Atualiza referência ao HRP mesmo se morrer e renascer
+local function updateHRP()
+	local char = player.Character or player.CharacterAdded:Wait()
+	hrp = char:WaitForChild("HumanoidRootPart")
 end
+
+updateHRP()
+player.CharacterAdded:Connect(updateHRP)
+
+-- Super Anti-Void loop
+RunService.Heartbeat:Connect(function()
+	if hrp and hrp.Position.Y <= -450 then
+		hrp.Velocity = Vector3.zero
+		hrp.CFrame = CFrame.new(hrp.Position.X, 10, hrp.Position.Z)
+	end
+end)
+
+                end)
+            else
+                print("Jogador não encontrado!")
+            end
+        else
+            print("Selecione um jogador primeiro.")
+        end
+    end
 })
 
 TrollTab:AddButton({
@@ -561,155 +588,40 @@ ScriptsTab:AddButton({
 ScriptsTab:AddButton({
     Name = "Fe doors",
     Callback = function()
-    local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Workspace = game:GetService("Workspace")
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
-local LocalPlayer = Players.LocalPlayer
-local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    local rotationSpeed = 10
+    local activationRadius = 20
+    local orbitRadius = 2
 
-mainStatus = true
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-	if input.KeyCode == Enum.KeyCode.RightControl and not gameProcessedEvent then
-		mainStatus = not mainStatus
-	end
-end)
+    local function updateDoors()
+      while true do
+        local currentTime = tick()
 
--- Ponto de referência invisível
-local Folder = Instance.new("Folder", Workspace)
-local Part = Instance.new("Part", Folder)
-local Attachment1 = Instance.new("Attachment", Part)
-Part.Anchored = true
-Part.CanCollide = false
-Part.Transparency = 1
+        for _, part in pairs(workspace:GetDescendants()) do
+          if part:IsA("BasePart") and part.Name:find("Door") then
+            local distance = (part.Position - humanoidRootPart.Position).magnitude
+            
+            if distance <= activationRadius then
+              local angle = currentTime * rotationSpeed
+              local offset = CFrame.new(math.cos(angle) * orbitRadius, 0, math.sin(angle) * orbitRadius)
+              
+              part.CFrame = humanoidRootPart.CFrame * offset
+            else
+              part.CFrame = CFrame.new(part.Position, part.Position + part.CFrame.LookVector)
+            end
+          end
+        end
 
--- Segue o HRP
-RunService.Heartbeat:Connect(function()
-	if humanoidRootPart then
-		Part.Position = humanoidRootPart.Position
-	end
-end)
+        wait(0.1)
+      end
+    end
 
--- Network
-if not getgenv().Network then
-	getgenv().Network = {
-		BaseParts = {},
-		Velocity = Vector3.new(14.46262424, 14.46262424, 14.46262424)
-	}
-
-	Network.RetainPart = function(Part)
-		if Part:IsA("BasePart") and Part:IsDescendantOf(Workspace) then
-			if not table.find(Network.BaseParts, Part) then
-				table.insert(Network.BaseParts, Part)
-			end
-			Part.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
-			Part.CanCollide = false
-			Part.Anchored = false
-			Part.Massless = false
-		end
-	end
-
-	local function EnablePartControl()
-		LocalPlayer.ReplicationFocus = Workspace
-		RunService.Heartbeat:Connect(function()
-			sethiddenproperty(LocalPlayer, "SimulationRadius", math.huge)
-			for _, Part in pairs(Network.BaseParts) do
-				if Part:IsDescendantOf(Workspace) then
-					Part.Velocity = Network.Velocity
-					Part.CanCollide = false -- reforça
-				end
-			end
-		end)
-	end
-
-	EnablePartControl()
-end
-
--- Prevenir colisão com o personagem
-local function PreventCollisionWithCharacter(part)
-	for _, charPart in pairs(character:GetChildren()) do
-		if charPart:IsA("BasePart") then
-			local noCollision = Instance.new("NoCollisionConstraint")
-			noCollision.Part0 = part
-			noCollision.Part1 = charPart
-			noCollision.Parent = part
-		end
-	end
-end
-
--- Força e reativa parte
-local function ForcePart(v)
-	if v:IsA("BasePart") and not v.Anchored and not v:IsDescendantOf(character)
-	and not v.Parent:FindFirstChildOfClass("Humanoid")
-	and not v.Parent:FindFirstChild("Head") and v.Name ~= "Handle" then
-
-		for _, x in ipairs(v:GetChildren()) do
-			if x:IsA("BodyMover") or x:IsA("RocketPropulsion")
-			or x:IsA("Weld") or x:IsA("WeldConstraint")
-			or x:IsA("AlignPosition") or x:IsA("AlignOrientation")
-			or x:IsA("Attachment") or x:IsA("Torque") then
-				x:Destroy()
-			end
-		end
-
-		v.Anchored = false
-		v.CanCollide = false
-		v.Massless = false
-
-		Network.RetainPart(v)
-		PreventCollisionWithCharacter(v)
-
-		local Torque = Instance.new("Torque", v)
-		Torque.Torque = Vector3.new(50000, 50000, 50000)
-
-		local AlignPosition = Instance.new("AlignPosition", v)
-		local Attachment2 = Instance.new("Attachment", v)
-
-		Torque.Attachment0 = Attachment2
-
-		AlignPosition.MaxForce = math.huge
-		AlignPosition.MaxVelocity = math.huge
-		AlignPosition.Responsiveness = 200
-		AlignPosition.Attachment0 = Attachment2
-		AlignPosition.Attachment1 = Attachment1
-
-		task.spawn(function()
-			while v and v.Parent and humanoidRootPart do
-				if (v.Position - humanoidRootPart.Position).Magnitude > 50 then
-					AlignPosition.Enabled = false
-					task.wait(0.05)
-					AlignPosition.Enabled = true
-				end
-				task.wait(1)
-			end
-		end)
-	end
-end
-
--- Aplica em tudo do mapa
-for _, v in ipairs(workspace:GetDescendants()) do
-	ForcePart(v)
-end
-
--- Aplica em partes novas
-workspace.DescendantAdded:Connect(function(v)
-	task.wait(0.1)
-	ForcePart(v)
-end)
-
--- Reforço constante de CanCollide = false
-task.spawn(function()
-	while true do
-		for _, part in ipairs(Network.BaseParts) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
-		end
-		task.wait(0.5)
-	end
-end)
+    updateDoors()
+  end
+})
 
 ScriptsTab:AddButton({
     Name = "REDz HUB",
