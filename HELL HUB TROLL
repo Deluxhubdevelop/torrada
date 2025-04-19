@@ -64,101 +64,101 @@ TrollTab:AddButton({
     Name = "Kill Jogador",
     Callback = function()
         if selectedPlayer ~= "" then
-            local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
-            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                local player = game.Players.LocalPlayer
+    local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local player = game.Players.LocalPlayer
+        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
+
+        local args = {
+            [1] = "PickingTools",
+            [2] = "Couch"
+        }
+
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+
+        local function equiparCouch()
+            local tools = player.Backpack:GetChildren()
+            for _, tool in ipairs(tools) do
+                if tool:IsA("Tool") and tool.Name == "Couch" then
+                    player.Character.Humanoid:EquipTool(tool)
+                end
+            end
+        end
+
+        equiparCouch()
+
+        killAtivo = true
+
+        spawn(function()
+            wait(0.1)
+            equiparCouch()
+        end)
+
+        teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
+            if not killAtivo then return end
+            local playerCharacter = game.Players.LocalPlayer.Character
+            if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
                 local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
+                local angle = (tick() * 98) % 6.28
+                local radius = 5
+                local offsetX = math.cos(angle) * radius
+                local offsetY = math.sin(angle) * radius
 
-                local args = {
-                    [1] = "PickingTools",
-                    [2] = "Couch"
-                }
+                playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
+                wait(0.1)
+                playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(99999, -448, 5))
+            end
+        end)
 
-                game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local lp = Players.LocalPlayer
 
-                local function equiparCouch()
-                    local tools = player.Backpack:GetChildren()
-                    for _, tool in ipairs(tools) do
-                        if tool:IsA("Tool") and tool.Name == "Couch" then
-                            player.Character.Humanoid:EquipTool(tool)
-                        end
+        -- Config
+        local VOID_Y = -450
+        local CHECK_INTERVAL = 0.1 -- Checagem frequente
+        local SAFE_HEIGHT = 10 -- Altura mínima segura
+        local RETURN_HEIGHT = 50 -- Altura pra onde vai ser teleportado se cair
+
+        -- Posição segura padrão (pode ser atualizada dinamicamente)
+        local lastSafePosition = nil
+
+        -- Atualiza a última posição segura se o player estiver em lugar aceitável
+        local function updateSafePosition()
+            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                local pos = lp.Character.HumanoidRootPart.Position
+                if pos.Y > SAFE_HEIGHT then
+                    lastSafePosition = pos
+                end
+            end
+        end
+
+        -- Loop de proteção anti-void
+        RunService.Heartbeat:Connect(function()
+            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = lp.Character.HumanoidRootPart
+                local pos = hrp.Position
+
+                -- Atualiza safe pos
+                updateSafePosition()
+
+                if pos.Y < VOID_Y then
+                    if lastSafePosition then
+                        hrp.CFrame = CFrame.new(lastSafePosition + Vector3.new(0, RETURN_HEIGHT, 0))
+                    else
+                        -- Caso não tenha uma posição salva, manda pra o alto no spawn
+                        hrp.CFrame = CFrame.new(0, 250, 0)
                     end
                 end
-
-                equiparCouch()
-
-                killAtivo = true
-
-                spawn(function()
-                    wait(0.1)
-                    equiparCouch()
-                end)
-
-                teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
-                    if not killAtivo then return end
-                    local playerCharacter = game.Players.LocalPlayer.Character
-                    if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
-                        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-                        local angle = (tick() * 98) % 6.28
-                        local radius = 5
-                        local offsetX = math.cos(angle) * radius
-                        local offsetY = math.sin(angle) * radius
-
-                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
-                        wait(0.1)
-                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(99999, -448, 5))
-                    end
-                end)
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local lp = Players.LocalPlayer
-
--- Config
-local VOID_Y = -450
-local CHECK_INTERVAL = 0.1 -- Checagem frequente
-local SAFE_HEIGHT = 10 -- Altura mínima segura
-local RETURN_HEIGHT = 50 -- Altura pra onde vai ser teleportado se cair
-
--- Posição segura padrão (pode ser atualizada dinamicamente)
-local lastSafePosition = nil
-
--- Atualiza a última posição segura se o player estiver em lugar aceitável
-local function updateSafePosition()
-    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-        local pos = lp.Character.HumanoidRootPart.Position
-        if pos.Y > SAFE_HEIGHT then
-            lastSafePosition = pos
-        end
+            end
+        end)
+    else
+        print("Jogador não encontrado!")
     end
+else
+    print("Selecione um jogador primeiro.")
 end
-
--- Loop de proteção anti-void
-RunService.Heartbeat:Connect(function()
-    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = lp.Character.HumanoidRootPart
-        local pos = hrp.Position
-
-        -- Atualiza safe pos
-        updateSafePosition()
-
-        if pos.Y < VOID_Y then
-            if lastSafePosition then
-                hrp.CFrame = CFrame.new(lastSafePosition + Vector3.new(0, RETURN_HEIGHT, 0))
-            else
-                -- Caso não tenha uma posição salva, manda pra o alto no spawn
-                hrp.CFrame = CFrame.new(0, 250, 0)
-            end
-        end
-    end
-end)
-            else
-                print("Jogador não encontrado!")
-            end
-        else
-            print("Selecione um jogador primeiro.")
-        end
-    end
 })
 
 TrollTab:AddButton({
