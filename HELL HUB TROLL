@@ -152,7 +152,6 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
-
             else
                 print("Jogador não encontrado!")
             end
