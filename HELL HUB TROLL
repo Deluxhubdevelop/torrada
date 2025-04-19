@@ -64,94 +64,180 @@ TrollTab:AddButton({
     Name = "Kill Jogador",
     Callback = function()
         if selectedPlayer ~= "" then
-    local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local player = game.Players.LocalPlayer
-        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
-
-        local args = {
-            [1] = "PickingTools",
-            [2] = "Couch"
-        }
-
-        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
-
-        local function equiparCouch()
-            local tools = player.Backpack:GetChildren()
-            for _, tool in ipairs(tools) do
-                if tool:IsA("Tool") and tool.Name == "Couch" then
-                    player.Character.Humanoid:EquipTool(tool)
-                end
-            end
-        end
-
-        equiparCouch()
-
-        killAtivo = true
-
-        spawn(function()
-            wait(0.1)
-            equiparCouch()
-        end)
-
-        teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
-            if not killAtivo then return end
-            local playerCharacter = game.Players.LocalPlayer.Character
-            if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
+            local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local player = game.Players.LocalPlayer
                 local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-                local angle = (tick() * 98) % 6.28
-                local radius = 5
-                local offsetX = math.cos(angle) * radius
-                local offsetY = math.sin(angle) * radius
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
 
-                -- Aplica BodyThrust por 2 segundos
-                if not playerCharacter.HumanoidRootPart:FindFirstChild("TemporaryThrust") then
-                    local thrust = Instance.new("BodyThrust")
-                    thrust.Name = "TemporaryThrust"
-                    thrust.Force = Vector3.new(0, 50000, 0)
-                    thrust.Location = Vector3.new(0, 0, 0)
-                    thrust.Parent = playerCharacter.HumanoidRootPart
-                    game.Debris:AddItem(thrust, 2) -- Remove após 2 segundos
+                local args = {
+                    [1] = "PickingTools",
+                    [2] = "Couch"
+                }
+
+                game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+
+                local function equiparCouch()
+                    local tools = player.Backpack:GetChildren()
+                    for _, tool in ipairs(tools) do
+                        if tool:IsA("Tool") and tool.Name == "Couch" then
+                            player.Character.Humanoid:EquipTool(tool)
+                        end
+                    end
                 end
 
-                playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
-                wait(0.1)
-                playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(999998, -495, 5))
+                equiparCouch()
+
+                killAtivo = true
+
+                spawn(function()
+                    wait(0.1)
+                    equiparCouch()
+                end)
+
+                teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
+                    if not killAtivo then return end
+                    local playerCharacter = game.Players.LocalPlayer.Character
+                    if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
+                        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+                        local angle = (tick() * 98) % 6.28
+                        local radius = 5
+                        local offsetX = math.cos(angle) * radius
+                        local offsetY = math.sin(angle) * radius
+
+                        -- Aplica BodyThrust por 2 segundos
+                        if not playerCharacter.HumanoidRootPart:FindFirstChild("TemporaryThrust") then
+                            local thrust = Instance.new("BodyThrust")
+                            thrust.Name = "TemporaryThrust"
+                            thrust.Force = Vector3.new(0, 50000, 0)
+                            thrust.Location = Vector3.new(0, 0, 0)
+                            thrust.Parent = playerCharacter.HumanoidRootPart
+                            game.Debris:AddItem(thrust, 2) -- Remove após 2 segundos
+                        end
+
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
+                        wait(0.1)
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(999998, -495, 5))
+                    end
+
+                    task.wait(0.1)
+
+                    -- Super Anti-Fling
+                    local RunService = game:GetService("RunService")
+                    local Players = game:GetService("Players")
+
+                    local player = Players.LocalPlayer
+                    local hrp = nil
+
+                    local function updateHRP()
+                        local char = player.Character or player.CharacterAdded:Wait()
+                        hrp = char:WaitForChild("HumanoidRootPart")
+                    end
+
+                    updateHRP()
+                    player.CharacterAdded:Connect(updateHRP)
+
+                    RunService.Heartbeat:Connect(function()
+                        if hrp and hrp.Position.Y <= -450 then
+                            hrp.Velocity = Vector3.zero
+                            hrp.CFrame = CFrame.new(hrp.Position.X, 10, hrp.Position.Z)
+                        end
+                    end)
+                end)
+            else
+                print("Jogador não encontrado!")
             end
-
-            task.wait(0.1)
-
-            -- Super Anti-Fling
-            local RunService = game:GetService("RunService")
-            local Players = game:GetService("Players")
-
-            local player = Players.LocalPlayer
-            local hrp = nil
-
-            local function updateHRP()
-                local char = player.Character or player.CharacterAdded:Wait()
-                hrp = char:WaitForChild("HumanoidRootPart")
-            end
-
-            updateHRP()
-            player.CharacterAdded:Connect(updateHRP)
-
-            RunService.Heartbeat:Connect(function()
-                if hrp and hrp.Position.Y <= -450 then
-                    hrp.Velocity = Vector3.zero
-                    hrp.CFrame = CFrame.new(hrp.Position.X, 10, hrp.Position.Z)
-                end
-            end)
-        end)
-    else
-        print("Jogador não encontrado!")
+        else
+            print("Selecione um jogador primeiro.")
+        end
     end
-else
-    print("Selecione um jogador primeiro.")
-end
-}) -- Este é o fechamento da função
+})  -- Este é o fechamento correto da função `AddButton`
 
+
+TrollTab:AddButton({
+    Name = "Kill Jogador",
+    Callback = function()
+        if selectedPlayer ~= "" then
+            local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local player = game.Players.LocalPlayer
+                local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
+
+                local args = {
+                    [1] = "PickingTools",
+                    [2] = "Couch"
+                }
+
+                game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+
+                local function equiparCouch()
+                    local tools = player.Backpack:GetChildren()
+                    for _, tool in ipairs(tools) do
+                        if tool:IsA("Tool") and tool.Name == "Couch" then
+                            player.Character.Humanoid:EquipTool(tool)
+                        end
+                    end
+                end
+
+                equiparCouch()
+
+                killAtivo = true
+
+                spawn(function()
+                    wait(0.1)
+                    equiparCouch()
+                end)
+
+                teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
+                    if not killAtivo then return end
+                    local playerCharacter = game.Players.LocalPlayer.Character
+                    if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
+                        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+                        local angle = (tick() * 98) % 6.28
+                        local radius = 5
+                        local offsetX = math.cos(angle) * radius
+                        local offsetY = math.sin(angle) * radius
+
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
+                        wait(0.1)
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(999998, -495, 5))
+                    end
+
+                   task.wait(0.1)
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+local hrp = nil
+
+-- Atualiza referência ao HRP mesmo se morrer e renascer
+local function updateHRP()
+	local char = player.Character or player.CharacterAdded:Wait()
+	hrp = char:WaitForChild("HumanoidRootPart")
+end
+
+updateHRP()
+player.CharacterAdded:Connect(updateHRP)
+
+-- Super Anti-Void loop
+RunService.Heartbeat:Connect(function()
+	if hrp and hrp.Position.Y <= -450 then
+		hrp.Velocity = Vector3.zero
+		hrp.CFrame = CFrame.new(hrp.Position.X, 10, hrp.Position.Z)
+	end
+end)
+
+                end)
+            else
+                print("Jogador não encontrado!")
+            end
+        else
+            print("Selecione um jogador primeiro.")
+        end
+    end
+})
 
 TrollTab:AddButton({
     Name = "Desativar Kill",
