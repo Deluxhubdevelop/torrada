@@ -148,83 +148,83 @@ end)
 TrollTab:AddButton({
     Name = "fling Jogador",
     Callback = function()
-       if selectedPlayer ~= "" then
-    local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
-    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local player = game.Players.LocalPlayer
-        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
-
-        local args = {
-            [1] = "PickingTools",
-            [2] = "Couch"
-        }
-
-        game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
-
-        local function equiparCouch()
-            local tools = player.Backpack:GetChildren()
-            for _, tool in ipairs(tools) do
-                if tool:IsA("Tool") and tool.Name == "Couch" then
-                    player.Character.Humanoid:EquipTool(tool)
-                end
-            end
-        end
-
-        equiparCouch()
-
-        killAtivo = true
-
-        spawn(function()
-            wait(0.1)
-            equiparCouch()
-        end)
-
-        teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
-            if not killAtivo then return end
-            local playerCharacter = game.Players.LocalPlayer.Character
-            if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
+        if selectedPlayer ~= "" then
+            local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                local player = game.Players.LocalPlayer
                 local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-                local angle = (tick() * 98) % 6.28
-                local radius = 5
-                local offsetX = math.cos(angle) * radius
-                local offsetY = math.sin(angle) * radius
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
 
-                -- Fling the player by adding a BodyVelocity
-                local bodyVelocity = Instance.new("BodyVelocity")
-                bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)  -- Força máxima
-                bodyVelocity.Velocity = Vector3.new(0, 100, 0)  -- Direção do fling (vertical)
-                bodyVelocity.Parent = playerCharacter.HumanoidRootPart
+                local args = {
+                    [1] = "PickingTools",
+                    [2] = "Couch"
+                }
 
-                -- Remove the BodyVelocity after 0.5 seconds
-                game.Debris:AddItem(bodyVelocity, 0.5)
+                game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
 
-                -- Store the original velocity to restore it later
-                local originalVelocity = playerCharacter.HumanoidRootPart.Velocity
-
-                -- Apply Anti-Fling by checking the player's Y position
-                if playerCharacter.HumanoidRootPart.Position.Y <= -450 then
-                    -- Restaura a velocidade original
-                    playerCharacter.HumanoidRootPart.Velocity = originalVelocity
-                    -- Teleporta para a posição (0, 10, 0)
-                    playerCharacter.HumanoidRootPart.CFrame = CFrame.new(0, 10, 0)
+                local function equiparCouch()
+                    local tools = player.Backpack:GetChildren()
+                    for _, tool in ipairs(tools) do
+                        if tool:IsA("Tool") and tool.Name == "Couch" then
+                            player.Character.Humanoid:EquipTool(tool)
+                        end
+                    end
                 end
 
-                -- Update player position to maintain the "fling"
-                playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
-                wait(0.1)
-                playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(999998, -495, 5))
-            end
+                equiparCouch()
 
-            task.wait(0.1)
-        end)
-    else
-        print("Jogador não encontrado!")
-    end
-else
-    print("Selecione um jogador primeiro.")
-end
-})
+                killAtivo = true
+
+                spawn(function()
+                    wait(0.1)
+                    equiparCouch()
+                end)
+
+                teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
+                    if not killAtivo then return end
+                    local playerCharacter = game.Players.LocalPlayer.Character
+                    if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
+                        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+                        local angle = (tick() * 98) % 6.28
+                        local radius = 5
+                        local offsetX = math.cos(angle) * radius
+                        local offsetY = math.sin(angle) * radius
+
+                        -- Fling the player by adding a BodyVelocity
+                        local bodyVelocity = Instance.new("BodyVelocity")
+                        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+                        bodyVelocity.Velocity = Vector3.new(0, 100, 0)
+                        bodyVelocity.Parent = playerCharacter.HumanoidRootPart
+
+                        -- Remove the BodyVelocity after 0.5 seconds
+                        game.Debris:AddItem(bodyVelocity, 0.5)
+
+                        -- Store the original velocity to restore it later
+                        local originalVelocity = playerCharacter.HumanoidRootPart.Velocity
+
+                        -- Anti-Fling: If below void, teleport to safe place
+                        if playerCharacter.HumanoidRootPart.Position.Y <= -450 then
+                            playerCharacter.HumanoidRootPart.Velocity = originalVelocity
+                            playerCharacter.HumanoidRootPart.CFrame = CFrame.new(0, 10, 0)
+                        end
+
+                        -- Orbit and reset position
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
+                        wait(0.1)
+                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(999998, -495, 5))
+                    end
+
+                    task.wait(0.1)
+                end)
+            else
+                print("Jogador não encontrado!")
+            end
+        else
+            print("Selecione um jogador primeiro.")
+        end
+    end -- 👈 Fim do Callback function
+}) -- 👈 Fim do AddButton
+
 
 TrollTab:AddButton({
     Name = "Desativar Kill",
