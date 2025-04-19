@@ -146,61 +146,73 @@ end)
 })
 
 TrollTab:AddButton({
-    Name = "fling Jogador",
+    Name = "Fling Jogador",
     Callback = function()
         if selectedPlayer ~= "" then
             local targetPlayer = game:GetService("Players"):FindFirstChild(selectedPlayer)
             if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 local player = game.Players.LocalPlayer
-                local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
+                local character = player.Character or player.CharacterAdded:Wait()
+                local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                local myHRP = character:WaitForChild("HumanoidRootPart")
 
+                -- Teleporta pra cima do jogador alvo
+                myHRP.CFrame = targetHRP.CFrame + Vector3.new(0, 5, 0)
+
+                -- Pega o item "Couch"
                 local args = {
                     [1] = "PickingTools",
                     [2] = "Couch"
                 }
-
                 game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
 
-                local function equiparCouch()
-                    local tools = player.Backpack:GetChildren()
-                    for _, tool in ipairs(tools) do
+                -- Equipa o item
+                local function equipCouch()
+                    for _, tool in ipairs(player.Backpack:GetChildren()) do
                         if tool:IsA("Tool") and tool.Name == "Couch" then
-                            player.Character.Humanoid:EquipTool(tool)
+                            character.Humanoid:EquipTool(tool)
                         end
                     end
                 end
+                equipCouch()
+                task.wait(0.1)
+                equipCouch()
 
-                equiparCouch()
+                -- Aplica BodyThrust por 2 segundos
+                local thrust = Instance.new("BodyThrust")
+                thrust.Force = Vector3.new(100000, 100000, 100000)
+                thrust.Location = myHRP.Position
+                thrust.Parent = myHRP
 
-                killAtivo = true
-
-                spawn(function()
-                    wait(0.1)
-                    equiparCouch()
+                task.delay(2, function()
+                    if thrust then thrust:Destroy() end
                 end)
 
-                teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
-                    if not killAtivo then return end
-                    local playerCharacter = game.Players.LocalPlayer.Character
-                    if playerCharacter and playerCharacter:FindFirstChild("HumanoidRootPart") then
-                        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-                        local angle = (tick() * 98) % 6.28
-                        local radius = 5
-                        local offsetX = math.cos(angle) * radius
-                        local offsetY = math.sin(angle) * radius
+                -- Ativa o Anti-Fling / Anti-Void
+                local RunService = game:GetService("RunService")
+                local function updateHRP()
+                    local char = player.Character or player.CharacterAdded:Wait()
+                    return char:WaitForChild("HumanoidRootPart")
+                end
+                local hrp = updateHRP()
 
-                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(offsetX, offsetY, 0))
-                        wait(0.1)
-                        playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(-999998, 999999999, -9999999999))
+                player.CharacterAdded:Connect(function()
+                    hrp = updateHRP()
+                end)
+
+                RunService.Heartbeat:Connect(function()
+                    if hrp and hrp.Position.Y <= -450 then
+                        hrp.Velocity = Vector3.zero
+                        hrp.CFrame = CFrame.new(0, 10, 0)
                     end
                 end)
 
+                print("Fling aplicado com sucesso.")
             else
-                print("Jogador não encontrado!")
+                warn("Jogador alvo inválido.")
             end
         else
-            print("Selecione um jogador primeiro.")
+            warn("Selecione um jogador primeiro.")
         end
     end
 })
