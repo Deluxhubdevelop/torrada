@@ -110,49 +110,6 @@ TrollTab:AddButton({
                 playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(99999, -448, 5))
             end
         end)
-
-        local Players = game:GetService("Players")
-        local RunService = game:GetService("RunService")
-        local lp = Players.LocalPlayer
-
-        -- Config
-        local VOID_Y = -450
-        local CHECK_INTERVAL = 0.1 -- Checagem frequente
-        local SAFE_HEIGHT = 10 -- Altura mínima segura
-        local RETURN_HEIGHT = 50 -- Altura pra onde vai ser teleportado se cair
-
-        -- Posição segura padrão (pode ser atualizada dinamicamente)
-        local lastSafePosition = nil
-
-        -- Atualiza a última posição segura se o player estiver em lugar aceitável
-        local function updateSafePosition()
-            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                local pos = lp.Character.HumanoidRootPart.Position
-                if pos.Y > SAFE_HEIGHT then
-                    lastSafePosition = pos
-                end
-            end
-        end
-
-        -- Loop de proteção anti-void
-        RunService.Heartbeat:Connect(function()
-            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = lp.Character.HumanoidRootPart
-                local pos = hrp.Position
-
-                -- Atualiza safe pos
-                updateSafePosition()
-
-                if pos.Y < VOID_Y then
-                    if lastSafePosition then
-                        hrp.CFrame = CFrame.new(lastSafePosition + Vector3.new(0, RETURN_HEIGHT, 0))
-                    else
-                        -- Caso não tenha uma posição salva, manda pra o alto no spawn
-                        hrp.CFrame = CFrame.new(0, 250, 0)
-                    end
-                end
-            end
-        end)
     else
         print("Jogador não encontrado!")
     end
