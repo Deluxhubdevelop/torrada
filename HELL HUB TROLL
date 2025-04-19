@@ -110,7 +110,6 @@ TrollTab:AddButton({
                         playerCharacter.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(99999, -448, 5))
                     end
                 end)
-            else
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lp = Players.LocalPlayer
@@ -154,6 +153,7 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
+            else
                 print("Jogador não encontrado!")
             end
         else
