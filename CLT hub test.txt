@@ -1,0 +1,137 @@
+local OrionLib = loadstring(game:HttpGet(('https://gist.githubusercontent.com/Deluxhubdevelop/67e9341868003900bb4f1208b2a291ab/raw/4d8c5c237e14efd4f8da9394c2d7555f212d3c1b/gistfile1.txt')))()
+
+local Window = OrionLib:MakeWindow({
+    Name = " CLT hub test",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "OrionTest"
+})
+
+local Tab = Window:MakeTab({
+    Name = "fling",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local selectedPlayer = nil
+
+-- Função para buscar jogador por nome parcial
+local function findPartialName(partial)
+    local matches = {}
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= game.Players.LocalPlayer and string.lower(player.Name):find(string.lower(partial)) then
+            table.insert(matches, player)
+        end
+    end
+    return matches
+end
+
+-- TextBox para digitar nome parcial
+Tab:AddTextbox({
+    Name = "Nome do jogador",
+    Default = "name of player",
+    TextDisappear = true,
+    Callback = function(Value)
+        local results = findPartialName(Value)
+        if #results == 1 then
+            selectedPlayer = results[1]
+            print("Selecionado:", selectedPlayer.Name)
+        elseif #results > 1 then
+            print("Vários jogadores encontrados:")
+            for _, p in ipairs(results) do
+                print("- " .. p.Name)
+            end
+        else
+            selectedPlayer = nil
+            print("Nenhum jogador encontrado.")
+        end
+    end
+})
+
+local killAtivo = false
+local teleportLoop = nil
+
+Tab:AddToggle({
+    Name = "fling",
+    Default = false,
+    Callback = function(Value)
+        killAtivo = Value
+
+        if not Value then
+            if teleportLoop then
+                teleportLoop:Disconnect()
+                teleportLoop = nil
+            end
+            print("Fling desativado.")
+            return
+        end
+
+        if selectedPlayer and selectedPlayer.Character and selectedPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local player = game.Players.LocalPlayer
+            local targetHRP = selectedPlayer.Character.HumanoidRootPart
+            local targetPosition = targetHRP.Position
+
+            -- Teleporta próximo ao player
+            player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition + Vector3.new(0, 5, 0))
+
+            -- Solicita ferramenta
+            local args = { "PickingTools", "Couch" }
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+
+            -- Equipa a ferramenta Couch
+            local function equiparCouch()
+                for _, tool in ipairs(player.Backpack:GetChildren()) do
+                    if tool:IsA("Tool") and tool.Name == "Couch" then
+                        player.Character.Humanoid:EquipTool(tool)
+                    end
+                end
+            end
+
+            equiparCouch()
+
+            spawn(function()
+                wait(0.1)
+                equiparCouch()
+            end)
+
+            teleportLoop = game:GetService("RunService").Heartbeat:Connect(function()
+                if not killAtivo then return end
+
+                local playerChar = player.Character
+                if playerChar and playerChar:FindFirstChild("HumanoidRootPart") then
+                    local angle = (tick() * 98) % 6.28
+                    local radius = 5
+                    local offset = Vector3.new(math.cos(angle) * radius, math.sin(angle) * radius, 0)
+
+                    if not playerChar.HumanoidRootPart:FindFirstChild("TemporaryThrust") then
+                        local thrust = Instance.new("BodyThrust")
+                        thrust.Name = "TemporaryThrust"
+                        thrust.Force = Vector3.new(0, 50000000000, 0)
+                        thrust.Location = Vector3.new(0, 0, 0)
+                        thrust.Parent = playerChar.HumanoidRootPart
+                        game.Debris:AddItem(thrust, 2)
+                    end
+
+                    playerChar.HumanoidRootPart.CFrame = CFrame.new(targetHRP.Position + offset)
+                    wait(0.1)
+                    playerChar.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(-9999999998, 999999999, -9999999999))
+                end
+
+                task.wait(0.1)
+
+                -- Anti-fall
+                local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if hrp and hrp.Position.Y <= -450 then
+                    hrp.Velocity = Vector3.zero
+                    hrp.CFrame = CFrame.new(hrp.Position.X, 10, hrp.Position.Z)
+                end
+            end)
+        else
+            warn("Jogador inválido ou sem personagem.")
+        end
+    end
+})
+
+
+
+OrionLib:Init()
