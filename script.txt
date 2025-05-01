@@ -100,4 +100,4 @@ local function createPaintRollerTornado(height, radius, rotationSpeed, verticalS
 end
 
 -- CHAMADA DIRETA (sem GUI)
-createPaintRollerTornado(400, 1000, 20, 3)
+createPaintRollerTornado(400, 1, 20, 3)
